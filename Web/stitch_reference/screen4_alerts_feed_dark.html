@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NER Risk GIS • Tactical Alert Feed</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Sora:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim with extended Risk Zone Ontology -->
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container-high": "#1e1e30",
+          "on-secondary-fixed": "#001a1a",
+          "on-secondary": "#001a1a",
+          "on-surface": "#e8e0f0",
+          "on-background": "#e8e0f0",
+          "surface": "#0f0f1a",
+          "tertiary-fixed-dim": "#ffe04a",
+          "tertiary-container": "#665200",
+          "on-error": "#1a0000",
+          "on-primary": "#1a0010",
+          "inverse-on-surface": "#0a0a12",
+          "secondary": "#00ffcc",
+          "surface-bright": "#1a1a2e",
+          "on-primary-container": "#ffe0ec",
+          "on-primary-fixed": "#3d0020",
+          "error-container": "#3d0f0f",
+          "surface-container-lowest": "#0a0a12",
+          "outline-variant": "#302840",
+          "background": "#0a0a12",
+          "on-tertiary": "#1a1000",
+          "secondary-fixed-dim": "#00e6b8",
+          "primary-fixed-dim": "#ff80aa",
+          "on-primary-fixed-variant": "#8c0038",
+          "on-tertiary-container": "#fff0c0",
+          "error": "#ff4444",
+          "on-tertiary-fixed": "#1a1000",
+          "secondary-container": "#004d3d",
+          "on-secondary-container": "#c0fff4",
+          "primary-container": "#b3004e",
+          "on-error-container": "#ffa0a0",
+          "tertiary": "#ffe04a",
+          "on-tertiary-fixed-variant": "#665200",
+          "surface-container": "#141422",
+          "on-secondary-fixed-variant": "#004d4d",
+          "primary": "#ff2d78",
+          "inverse-primary": "#8c0038",
+          "surface-container-low": "#111118",
+          "surface-tint": "#ff2d78",
+          "surface-variant": "#1e1e30",
+          "outline": "#5a5068",
+          "surface-container-highest": "#28283e",
+          "tertiary-fixed": "#fff0c0",
+          "on-surface-variant": "#a098b0",
+          "surface-dim": "#0f0f1a",
+          "primary-fixed": "#ffe0ec",
+          "secondary-fixed": "#c0fff4",
+          "inverse-surface": "#e8e0f0",
+          // Strict Zone Ontology Palette
+          "zone1-primary": "#D32F2F",
+          "zone1-fill": "#FFEBEE",
+          "zone1-stroke": "#B71C1C",
+          "zone2-primary": "#ED6C02",
+          "zone2-fill": "#FFF3E0",
+          "zone2-stroke": "#E65100",
+          "zone3-primary": "#F57C00",
+          "zone3-fill": "#FFF8E1",
+          "zone3-stroke": "#FF8F00",
+          "zone4-primary": "#0288D1",
+          "zone4-fill": "#E1F5FE",
+          "zone4-stroke": "#01579B",
+          "banner-crit-primary": "#B71C1C",
+          "banner-crit-tint": "#EF5350",
+          "banner-crit-stroke": "#7F0000",
+          "banner-detour-primary": "#E65100",
+          "banner-detour-tint": "#FFA726",
+          "banner-detour-stroke": "#A73A00",
+          "telemetry-pulse": "#00E676",
+          "telemetry-glow": "#69F0AE",
+          "telemetry-stroke": "#00B0FF"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "fontFamily": {
+          "headline": [
+            "Sora",
+            "sans-serif"
+          ],
+          "display": [
+            "Sora",
+            "sans-serif"
+          ],
+          "body": [
+            "Sora",
+            "sans-serif"
+          ],
+          "label": [
+            "Space Grotesk",
+            "sans-serif"
+          ]
+        },
+        "fontSize": {}
+      },
+    },
+  }
+</script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Vector topo scanline cyber micro-grid */
+    .telemetry-grid {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(211, 47, 47, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 230, 118, 0.04) 1px, transparent 1px);
+    }
+    /* Live Telemetry Pulse Dot Animation */
+    @keyframes telemetryPulseAnim {
+      0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(105, 240, 174, 0.8), 0 0 8px 2px #69F0AE;
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 0 5px rgba(105, 240, 174, 0), 0 0 14px 4px #00E676;
+        transform: scale(1.15);
+      }
+    }
+    .telemetry-live-dot {
+      animation: telemetryPulseAnim 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    /* Zone-specific glow utilities */
+    .glow-zone1 {
+      box-shadow: 0 0 18px -2px rgba(211, 47, 47, 0.55), inset 0 0 8px rgba(183, 28, 28, 0.25);
+    }
+    .glow-zone2 {
+      box-shadow: 0 0 14px -2px rgba(237, 108, 2, 0.45);
+    }
+    .glow-zone3 {
+      box-shadow: 0 0 12px -2px rgba(245, 124, 0, 0.4);
+    }
+    .glow-zone4 {
+      box-shadow: 0 0 14px -2px rgba(2, 136, 209, 0.45);
+    }
+    .glow-dock {
+      box-shadow: 0 -4px 24px 0 rgba(211, 47, 47, 0.2), 0 -1px 1px 0 rgba(211, 47, 47, 0.4);
+    }
+    /* Custom scrollbar for HUD */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0a12;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #28283e;
+      border-radius: 2px;
+    }
+    body {
+      min-height: max(884px, 100dvh);
+      font-family: 'Sora', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen telemetry-grid flex flex-col selection:bg-[#D32F2F] selection:text-white">
+<!-- ========================================================================= -->
+<!-- TOP APP BAR (Shared Component Anchor)                                     -->
+<!-- ========================================================================= -->
+<header class="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-3 h-12 max-w-lg mx-auto bg-surface-container/90 backdrop-blur-md rounded-lg mx-3 mt-3 border border-outline-variant/60 shadow-lg shadow-black/40">
+<button aria-label="Open Sector Menu" class="w-8 h-8 flex items-center justify-center text-[#D32F2F] hover:bg-surface-variant hover:text-[#00E676] active:scale-95 transition-transform duration-150 rounded" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="menu">menu</span>
+</button>
+<div class="flex items-center gap-2">
+<!-- Live Telemetry Pulse Dot -->
+<span class="w-2.5 h-2.5 rounded-full bg-[#00E676] border border-[#00B0FF] telemetry-live-dot"></span>
+<h1 class="text-sm font-headline font-bold text-on-surface tracking-wider uppercase drop-shadow-[0_0_8px_rgba(211,47,47,0.5)]">
+        NER Risk GIS • Shillong
+      </h1>
+</div>
+<button aria-label="Voice Telemetry Log" class="w-8 h-8 flex items-center justify-center text-[#D32F2F] hover:bg-surface-variant hover:text-[#00E676] active:scale-95 transition-transform duration-150 rounded" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="mic">mic</span>
+</button>
+</header>
+<!-- ========================================================================= -->
+<!-- MAIN TACTICAL VIEWPORT / ALERT SHEET                                      -->
+<!-- ========================================================================= -->
+<main class="w-full max-w-lg mx-auto pt-18 pb-24 px-3 flex-1 flex flex-col">
+<!-- COMMAND SEARCH BAR -->
+<div class="mt-4 mb-3">
+<div class="relative flex items-center bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant rounded-lg px-3 py-2 shadow-inner focus-within:border-[#0288D1] focus-within:shadow-[0_0_12px_rgba(2,136,209,0.35)] transition-all">
+<span class="material-symbols-outlined text-[#0288D1] mr-2 text-xl drop-shadow-[0_0_6px_rgba(2,136,209,0.6)]" data-icon="search">search</span>
+<input class="w-full bg-transparent border-none p-0 text-on-surface text-xs font-body placeholder:text-outline focus:ring-0 focus:outline-none" placeholder="Search location, sector coordinates, NH route..." type="text" value="Shillong Sector • East Khasi Hills"/>
+<div class="flex items-center gap-1.5 border-l border-outline-variant/60 pl-2">
+<span class="text-[10px] font-label uppercase text-[#000000] bg-[#00E676] border border-[#00B0FF] px-1.5 py-0.5 rounded tracking-wider shadow-[0_0_8px_#69F0AE] font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#000000]"></span>
+            GPS LOCK
+          </span>
+<button class="text-on-surface-variant hover:text-[#00E676] p-1 active:scale-95 transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="tune">tune</span>
+</button>
+</div>
+</div>
+</div>
+<!-- SHEET HUD HEADER & POPUP DRAWER INDICATOR -->
+<div class="bg-surface-container-low border border-outline-variant/60 rounded-t-xl px-4 pt-3 pb-2 flex flex-col shadow-lg">
+<!-- Drag grabber rail -->
+<div class="w-10 h-1 bg-outline-variant rounded-full mx-auto mb-2.5"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#D32F2F] text-xl drop-shadow-[0_0_8px_rgba(211,47,47,0.7)]" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-headline font-bold text-on-surface tracking-wide">INCIDENT FEED &amp; NEARBY ALERTS</span>
+<span class="bg-[#D32F2F] text-[#FFFFFF] border border-[#B71C1C] text-[10px] font-label px-1.5 py-0.5 rounded uppercase font-bold tracking-wider shadow-[0_0_10px_rgba(211,47,47,0.45)]">
+                14 Active
+              </span>
+</div>
+<p class="text-[10px] font-label text-on-surface-variant tracking-wider">
+              ONTOLOGY FILTER: ZONE 1-4 &amp; 200M/200KM RADII
+            </p>
+</div>
+</div>
+<!-- Live radar sync with telemetry pulse dot ontology: Primary #00E676, Glow #69F0AE, Stroke #00B0FF, Text #000000 -->
+<button class="text-[11px] font-label text-[#000000] bg-[#00E676] hover:bg-[#69F0AE] flex items-center gap-1.5 px-2.5 py-1 rounded border border-[#00B0FF] active:scale-95 shadow-[0_0_10px_#69F0AE] font-bold transition-all" type="button">
+<span class="w-2 h-2 rounded-full bg-[#000000] telemetry-live-dot"></span>
+<span class="material-symbols-outlined text-xs" data-icon="refresh">refresh</span>
+          SYNC 1m
+        </button>
+</div>
+<!-- FILTER CHIPS (Horizontal Scroll - Ontology Mapped) -->
+<div class="flex items-center gap-1.5 overflow-x-auto py-2.5 no-scrollbar">
+<!-- All Button -->
+<button class="whitespace-nowrap px-2.5 py-1 rounded text-xs font-label uppercase bg-[#D32F2F] text-[#FFFFFF] font-bold border border-[#B71C1C] shadow-[0_0_10px_rgba(211,47,47,0.5)] transition-transform active:scale-95" type="button">
+          All (14)
+        </button>
+<!-- Zone 1 / Ground Zero chip -->
+<button class="whitespace-nowrap px-2.5 py-1 rounded text-xs font-label uppercase bg-surface-container text-[#FFEBEE] hover:text-[#FFFFFF] border border-[#B71C1C] flex items-center gap-1.5 transition-colors" type="button">
+<span class="w-2 h-2 rounded-full bg-[#D32F2F] shadow-[0_0_6px_#D32F2F]"></span>
+          Zone 1 (Ground Zero)
+        </button>
+<!-- Zone 2 / Severe Impact chip -->
+<button class="whitespace-nowrap px-2.5 py-1 rounded text-xs font-label uppercase bg-surface-container text-[#FFF3E0] hover:text-[#FFFFFF] border border-[#E65100] flex items-center gap-1.5 transition-colors" type="button">
+<span class="w-2 h-2 rounded-full bg-[#ED6C02] shadow-[0_0_6px_#ED6C02]"></span>
+          Zone 2 (Severe)
+        </button>
+<!-- Zone 3 / Moderate chip -->
+<button class="whitespace-nowrap px-2.5 py-1 rounded text-xs font-label uppercase bg-surface-container text-[#FFF8E1] hover:text-[#FF8F00] border border-[#FF8F00] flex items-center gap-1.5 transition-colors" type="button">
+<span class="w-2 h-2 rounded-full bg-[#F57C00] shadow-[0_0_6px_#F57C00]"></span>
+          Zone 3 (Disruption)
+        </button>
+<!-- Zone 4 / Advisory chip -->
+<button class="whitespace-nowrap px-2.5 py-1 rounded text-xs font-label uppercase bg-surface-container text-[#E1F5FE] hover:text-[#FFFFFF] border border-[#01579B] flex items-center gap-1.5 transition-colors" type="button">
+<span class="w-2 h-2 rounded-full bg-[#0288D1] shadow-[0_0_6px_#0288D1]"></span>
+          Zone 4 (Advisory)
+        </button>
+</div>
+</div>
+<!-- ALERT FEED CONTAINER -->
+<div class="bg-surface-container-lowest/90 border-x border-b border-outline-variant/60 rounded-b-xl p-3 space-y-3.5 shadow-2xl">
+<!-- ===================================================================== -->
+<!-- ZONE 1: GROUND ZERO / CLOUDBURST ALERT                                -->
+<!-- Zone 1: Primary #D32F2F, Fill #FFEBEE, Stroke #B71C1C, Text #FFFFFF   -->
+<!-- Evac Banner: Primary #B71C1C, Light tint #EF5350, Stroke #7F0000, Text #FFFFFF -->
+<!-- ===================================================================== -->
+<div class="relative bg-[#0f0f1a] border-2 border-[#B71C1C] rounded-lg p-3 overflow-hidden shadow-xl glow-zone1">
+<!-- Glowing Zone 1 top strip with stroke and primary -->
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#B71C1C] via-[#D32F2F] to-[#B71C1C]"></div>
+<div class="flex items-start justify-between gap-2 pt-1 mb-1.5">
+<div class="flex items-center gap-1.5 flex-wrap">
+<!-- Zone 1 Tag: Primary #D32F2F, Stroke #B71C1C, Text #FFFFFF -->
+<span class="bg-[#D32F2F] text-[#FFFFFF] border border-[#B71C1C] font-label text-[10px] px-2 py-0.5 rounded flex items-center gap-1 font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(211,47,47,0.7)]">
+<span class="material-symbols-outlined text-xs" data-icon="crisis_alert" style="font-variation-settings: 'FILL' 1;">crisis_alert</span>
+              ZONE 1 • GROUND ZERO
+            </span>
+<span class="bg-[#FFEBEE]/10 text-[#FFEBEE] border border-[#B71C1C] font-label text-[10px] px-1.5 py-0.5 rounded tracking-wider">
+              IMD • SDMA VERIFIED
+            </span>
+</div>
+<span class="text-[11px] font-label text-outline whitespace-nowrap">
+            12m AGO
+          </span>
+</div>
+<div class="flex items-start gap-2.5 my-2">
+<!-- Fill #FFEBEE tint with Stroke #B71C1C -->
+<div class="p-2 rounded bg-[#FFEBEE]/15 border-2 border-[#B71C1C] text-[#D32F2F] shrink-0 shadow-[0_0_12px_rgba(211,47,47,0.4)]">
+<span class="material-symbols-outlined text-2xl" data-icon="flood" style="font-variation-settings: 'FILL' 1;">flood</span>
+</div>
+<div class="flex-1">
+<h2 class="text-base font-headline font-bold text-[#FFFFFF] leading-snug">
+              Severe Flash Flood &amp; Cloudburst Alert
+            </h2>
+<div class="flex items-center gap-2 mt-1 text-[11px] font-label text-[#FFEBEE] tracking-wide">
+<span class="flex items-center gap-1 text-[#D32F2F] font-bold">
+<span class="material-symbols-outlined text-xs" data-icon="radar">radar</span>
+                GROUND ZERO RADIUS
+              </span>
+<span>•</span>
+<span class="text-on-surface">EAST KHASI HILLS / SHILLONG CORRIDOR</span>
+</div>
+</div>
+</div>
+<p class="text-xs font-body text-[#FFEBEE]/90 bg-[#FFEBEE]/5 p-2.5 rounded border border-[#B71C1C]/40 mt-2 leading-relaxed">
+          High population displacement risk. Sustained heavy precipitation measured at <span class="font-label text-[#D32F2F] bg-[#FFEBEE] px-1 py-0.5 rounded font-bold drop-shadow-[0_0_4px_rgba(211,47,47,0.6)]">62.4 mm/hr</span>. Catchment surge active in Umshing river basin.
+        </p>
+<!-- CRITICAL EVACUATION BANNER: Primary #B71C1C, Light tint #EF5350, Stroke #7F0000, Text #FFFFFF -->
+<div class="mt-2.5 p-2 rounded-md bg-[#B71C1C] border-2 border-[#7F0000] text-[#FFFFFF] shadow-[0_0_12px_rgba(183,28,28,0.5)] flex items-center justify-between gap-2">
+<div class="flex items-center gap-1.5 text-xs font-label font-bold tracking-wider">
+<span class="material-symbols-outlined text-base text-[#EF5350]" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span>CRITICAL EVACUATION BANNER: Evacuate Low-Lying Slopes</span>
+</div>
+<button class="bg-[#EF5350] hover:bg-white hover:text-[#B71C1C] text-[#FFFFFF] font-label text-[11px] uppercase font-bold px-3 py-1.5 rounded border border-[#7F0000] flex items-center gap-1 active:scale-95 transition-all shadow-[0_0_8px_rgba(239,83,80,0.6)] shrink-0" type="button">
+<span>Evacuation SOP</span>
+<span class="material-symbols-outlined text-xs" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- ===================================================================== -->
+<!-- ZONE 2: SEVERE IMPACT / NH-306 ROCKFALL                               -->
+<!-- Zone 2: Primary #ED6C02, Fill #FFF3E0, Stroke #E65100, Text #FFFFFF   -->
+<!-- Action Detour Banner: Primary #E65100, Light tint #FFA726, Stroke #A73A00, Text #FFFFFF -->
+<!-- ===================================================================== -->
+<div class="bg-[#0f0f1a] border-2 border-[#E65100] rounded-lg p-3 transition-colors shadow-md glow-zone2">
+<div class="flex items-center justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-1.5">
+<!-- Zone 2 Tag: Primary #ED6C02, Fill #FFF3E0, Stroke #E65100, Text #FFFFFF -->
+<span class="bg-[#ED6C02] text-[#FFFFFF] border border-[#E65100] font-label text-[10px] font-bold px-1.5 py-0.5 rounded uppercase flex items-center gap-1 tracking-wider shadow-[0_0_8px_rgba(237,108,2,0.4)]">
+<span class="material-symbols-outlined text-xs" data-icon="landslide" style="font-variation-settings: 'FILL' 1;">landslide</span>
+              ZONE 2 • SEVERE IMPACT
+            </span>
+<span class="text-[10px] font-label text-[#FFF3E0] bg-[#FFF3E0]/10 px-1 py-0.5 rounded border border-[#E65100]/50 tracking-wider font-semibold">18 KM AWAY</span>
+</div>
+<span class="text-[11px] font-label text-outline">38m AGO</span>
+</div>
+<div class="flex items-start justify-between gap-2">
+<div>
+<h3 class="text-sm font-headline font-bold text-[#FFFFFF]">
+              NH-306 KM 42 Rockfall &amp; Arterial Road Severed
+            </h3>
+<p class="text-xs font-body text-on-surface-variant mt-1 leading-relaxed">
+              Deep bedrock shearing across both inbound lanes. Heavy earthmoving equipment and BRO response units en route.
+            </p>
+</div>
+</div>
+<!-- Telemetry & Crowd Confirmation Row -->
+<div class="grid grid-cols-2 gap-2 mt-2.5 py-1.5 border border-[#E65100]/40 bg-[#FFF3E0]/10 px-2.5 rounded">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#ED6C02] text-sm" data-icon="verified_user">verified_user</span>
+<span class="text-xs font-label text-on-surface">
+<strong class="font-label text-[#ED6C02] font-bold">142</strong> Citizen Reports
+            </span>
+</div>
+<div class="flex items-center justify-end gap-1.5">
+<!-- Live Telemetry Pulse indicator -->
+<span class="w-2 h-2 rounded-full bg-[#00E676] border border-[#00B0FF] telemetry-live-dot"></span>
+<span class="text-xs font-label text-[#ED6C02] font-semibold">
+              Sensor: +18.4 cm
+            </span>
+</div>
+</div>
+<!-- ACTION DETOUR BANNER: Primary #E65100, Light tint #FFA726, Stroke #A73A00, Text #FFFFFF -->
+<div class="mt-2.5 p-2 rounded-md bg-[#E65100] border-2 border-[#A73A00] text-[#FFFFFF] shadow-[0_0_10px_rgba(230,81,0,0.5)] flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-xs font-label font-bold tracking-wide">
+<span class="material-symbols-outlined text-sm text-[#FFA726]" data-icon="alt_route">alt_route</span>
+<span>ACTION DETOUR BANNER: Zero Passable Lanes</span>
+</div>
+<button class="bg-[#FFA726] hover:bg-white hover:text-[#E65100] text-[#FFFFFF] text-xs font-label px-3 py-1 rounded border border-[#A73A00] flex items-center gap-1 active:scale-95 transition-colors font-bold shadow-[0_0_6px_rgba(255,167,38,0.5)] shrink-0" type="button">
+<span>Route Bypass</span>
+<span class="material-symbols-outlined text-xs" data-icon="turn_right">turn_right</span>
+</button>
+</div>
+</div>
+<!-- ===================================================================== -->
+<!-- ZONE 3: MODERATE DISRUPTION / SLOPE TENSION CRACK                     -->
+<!-- Zone 3: Primary #F57C00, Fill #FFF8E1, Stroke #FF8F00, Text #000000   -->
+<!-- ===================================================================== -->
+<div class="bg-[#0f0f1a] border-2 border-[#FF8F00] rounded-lg p-3 transition-colors shadow-md glow-zone3">
+<div class="flex items-center justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-1.5">
+<!-- Zone 3 Tag: Primary #F57C00, Fill #FFF8E1, Stroke #FF8F00, Text #000000 -->
+<span class="bg-[#FFF8E1] text-[#000000] border-2 border-[#FF8F00] text-[10px] font-label font-bold px-2 py-0.5 rounded uppercase flex items-center gap-1 tracking-wider shadow-[0_0_8px_rgba(245,124,0,0.3)]">
+<span class="material-symbols-outlined text-xs text-[#F57C00]" data-icon="warning_amber" style="font-variation-settings: 'FILL' 1;">warning_amber</span>
+              ZONE 3 • MODERATE DISRUPTION
+            </span>
+<span class="text-[10px] font-label text-[#000000] bg-[#F57C00] font-bold px-1.5 py-0.5 rounded border border-[#FF8F00] tracking-wider">89 FLAGGED</span>
+</div>
+<span class="text-[11px] font-label text-outline">1h 14m AGO</span>
+</div>
+<h3 class="text-sm font-headline font-bold text-on-surface">
+          Laitkor Ridge Soil Subsidence &amp; Slope Tension Crack
+        </h3>
+<p class="text-xs font-body text-on-surface-variant mt-1 leading-relaxed">
+          Active lateral ground fissure propagating near residential cluster 4. Geological sensor telemetry confirms continuous creep rate.
+        </p>
+<div class="flex items-center justify-between mt-2.5 bg-[#FFF8E1]/10 p-2 rounded border border-[#FF8F00]/40 text-xs font-label">
+<div class="flex items-center gap-1.5 text-[#F57C00] font-semibold">
+<span class="w-2 h-2 rounded-full bg-[#00E676] border border-[#00B0FF] telemetry-live-dot"></span>
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+          Sensor: +4.2 mm/hr
+        </div>
+<span class="flex items-center gap-1 text-[#F57C00] font-bold">
+<span class="material-symbols-outlined text-xs" data-icon="location_on">location_on</span>
+          Sector 7 • 2.4 km away
+        </span>
+</div>
+</div>
+<!-- ===================================================================== -->
+<!-- SECTION DIVIDER: HYPERLOCAL THREATS (WITHIN 200M RADIUS)              -->
+<!-- ===================================================================== -->
+<div class="pt-2">
+<div class="flex items-center gap-2 mb-2 px-1">
+<div class="h-px bg-gradient-to-r from-transparent via-[#0288D1]/50 to-transparent flex-1"></div>
+<div class="flex items-center gap-1 text-xs font-label text-[#0288D1] uppercase font-bold tracking-wider drop-shadow-[0_0_6px_rgba(2,136,209,0.6)]">
+<span class="material-symbols-outlined text-sm" data-icon="near_me">near_me</span>
+            Hyperlocal Zone • 200m Radius
+          </div>
+<div class="h-px bg-gradient-to-r from-transparent via-[#0288D1]/50 to-transparent flex-1"></div>
+</div>
+<div class="space-y-2.5">
+<!-- ITEM 4: ROAD BLOCKAGE (ZONE 3 MODERATE DISRUPTION) -->
+<!-- Zone 3: Primary #F57C00, Fill #FFF8E1, Stroke #FF8F00, Text #000000 -->
+<div class="bg-surface-container border-2 border-[#FF8F00] rounded-lg p-2.5 hover:shadow-[0_0_12px_rgba(245,124,0,0.3)] transition-colors">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-start gap-2">
+<div class="p-1.5 rounded bg-[#FFF8E1] border border-[#FF8F00] text-[#000000] shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-lg text-[#F57C00]" data-icon="block">block</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-headline font-bold text-on-surface">Road Blockage • NH-106 Link</span>
+<span class="bg-[#FFF8E1] text-[#000000] text-[10px] font-label font-bold px-1.5 py-0.5 rounded border border-[#FF8F00]">Zone 3 • 124m</span>
+</div>
+<p class="text-xs font-body text-on-surface-variant mt-0.5 leading-relaxed">
+                    Fallen pine tree and localized mud slip obstructing single lane. Heavy congestion, non-catastrophic.
+                  </p>
+<div class="flex items-center gap-2 mt-1.5 text-[11px] font-label text-outline">
+<span class="text-[#F57C00] font-semibold">34 Citizen flags</span>
+<span>•</span>
+<span>Local PWD cleared ETA 25m</span>
+</div>
+</div>
+</div>
+<button aria-label="Confirm incident" class="p-1.5 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-[#F57C00] active:scale-95 transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="thumb_up">thumb_up</span>
+</button>
+</div>
+</div>
+<!-- ITEM 5: FLASH WATERLOGGING & POTHOLE (ZONE 4 NEGLIGIBLE / ADVISORY) -->
+<!-- Zone 4: Primary #0288D1, Fill #E1F5FE, Stroke #01579B, Text #FFFFFF -->
+<div class="bg-surface-container border-2 border-[#01579B] rounded-lg p-2.5 hover:shadow-[0_0_12px_rgba(2,136,209,0.35)] transition-colors glow-zone4">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-start gap-2">
+<div class="p-1.5 rounded bg-[#E1F5FE] border border-[#01579B] text-[#0288D1] shrink-0 mt-0.5 shadow-[0_0_8px_rgba(2,136,209,0.3)]">
+<span class="material-symbols-outlined text-lg" data-icon="water">water</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-headline font-bold text-on-surface">Flash Waterlogging &amp; Pothole Trench</span>
+<!-- Zone 4 Badge: Primary #0288D1, Fill #E1F5FE, Stroke #01579B, Text #FFFFFF -->
+<span class="bg-[#0288D1] text-[#FFFFFF] text-[10px] font-label font-bold px-1.5 py-0.5 rounded border border-[#01579B]">Zone 4 • 156m</span>
+</div>
+<p class="text-xs font-body text-on-surface-variant mt-0.5 leading-relaxed">
+                    G.S. Road low pass submerged 0.4m due to clogged culvert drain. Two-wheeler slip hazard flagged.
+                  </p>
+<div class="flex items-center gap-2 mt-1.5 text-[11px] font-label text-outline">
+<span class="text-[#0288D1] font-semibold">19 Citizen flags</span>
+<span>•</span>
+<span>Municipal drain squad alerted</span>
+</div>
+</div>
+</div>
+<button aria-label="Confirm incident" class="p-1.5 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-[#0288D1] active:scale-95 transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="thumb_up">thumb_up</span>
+</button>
+</div>
+</div>
+<!-- ITEM 6: SNAPPED FIBER / UTILITY (ZONE 4 ADVISORY) -->
+<!-- Zone 4: Primary #0288D1, Fill #E1F5FE, Stroke #01579B, Text #FFFFFF -->
+<div class="bg-surface-container border border-[#01579B]/60 rounded-lg p-2.5 hover:border-[#01579B] transition-colors">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-start gap-2">
+<div class="p-1.5 rounded bg-[#E1F5FE]/20 border border-[#01579B] text-[#0288D1] shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-lg" data-icon="electrical_services">electrical_services</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-headline font-bold text-on-surface">Snapped Fiber / Utility Line</span>
+<span class="bg-[#0288D1]/20 text-[#E1F5FE] text-[10px] font-label font-bold px-1.5 py-0.5 rounded border border-[#01579B]">Zone 4 • 190m</span>
+</div>
+<p class="text-xs font-body text-on-surface-variant mt-0.5 leading-relaxed">
+                    Low-hanging telecom line near Police Point crossing. No electrical spark detected.
+                  </p>
+<div class="flex items-center gap-2 mt-1.5 text-[11px] font-label text-outline">
+<span class="text-[#0288D1]">8 Citizen flags • Advisory status</span>
+</div>
+</div>
+</div>
+<button aria-label="Confirm incident" class="p-1.5 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-[#0288D1] active:scale-95 transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="thumb_up">thumb_up</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- ========================================================================= -->
+<!-- BOTTOM DOCKED NAVIGATION                                                  -->
+<!-- ========================================================================= -->
+<nav aria-label="Operational HUD Navigation" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 h-16 bg-surface-container-lowest/95 backdrop-blur-md border-t border-outline-variant/60 glow-dock max-w-lg mx-auto right-0">
+<!-- BUTTON 1: Protocols / Help -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-[#00E676] active:scale-95 transition-all duration-150 rounded group" title="Field Protocol &amp; Help" type="button">
+<span class="material-symbols-outlined text-xl group-hover:drop-shadow-[0_0_8px_#69F0AE]" data-icon="help">help</span>
+<span class="text-[10px] font-label uppercase mt-0.5 tracking-wider font-semibold">Protocols</span>
+</button>
+<!-- BUTTON 2: Geo Location Camera App / Report Hazard -->
+<button class="flex flex-col items-center justify-center -mt-5 bg-surface-container-high border-2 border-[#D32F2F] hover:border-[#EF5350] text-on-surface px-3 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-150 group glow-zone1" title="Geo-Location Camera App • Upload Hazard" type="button">
+<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#D32F2F] to-[#B71C1C] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-2xl text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.7)]" data-icon="photo_camera">photo_camera</span>
+</div>
+<span class="text-[10px] font-label uppercase font-bold text-[#D32F2F] mt-1 tracking-wider drop-shadow-[0_0_6px_rgba(211,47,47,0.6)]">Geo Cam</span>
+</button>
+<!-- BUTTON 3: 'nearby' - Active Alert List (Zone 1 Primary / Text White) -->
+<button class="flex flex-col items-center justify-center bg-[#D32F2F] text-[#FFFFFF] rounded px-3.5 py-1.5 active:scale-95 transition-transform duration-150 shadow-[0_0_14px_rgba(211,47,47,0.6)] border border-[#B71C1C]" title="Active Nearby Alert List (200m / 200km)" type="button">
+<span class="material-symbols-outlined text-xl drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]" data-icon="near_me" style="font-variation-settings: 'FILL' 1;">near_me</span>
+<span class="text-[10px] font-label uppercase font-bold mt-0.5 tracking-wider">Nearby</span>
+</button>
+</nav>
+</body></html>

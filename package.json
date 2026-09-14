@@ -1,0 +1,16 @@
+{
+  "name": "sih-2026-disaster-intelligence",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "Backend",
+    "Web"
+  ],
+  "scripts": {
+    "start": "npm run start --workspace=Backend",
+    "dev:backend": "npm run dev --workspace=Backend",
+    "dev:web": "npm run dev --workspace=Web",
+    "build:web": "npm run build --workspace=Web"
+  }
+}
