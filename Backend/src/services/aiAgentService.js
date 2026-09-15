@@ -1,5 +1,6 @@
 import { db } from '../config/db.js';
 import { calculateHazardTiers } from './hazardZoneCalculator.js';
+import { generateOfficialGovtAlert, generateAiClimaticPrediction } from '../../../AI model/agent_predictor.js';
 
 /**
  * Autonomous Gemini ReAct Reasoning Loop (Demo Simulation Engine)
@@ -99,14 +100,48 @@ export async function runDisasterIntelligenceReActLoop(incident, io) {
   };
   reasoningSteps.push(toolCall2);
 
-  // Step 6: Update State in DB
+  // Step 6: Update State in DB with Official and Predicted Structures
+  let officialAlert = null;
+  let predictedAlert = null;
+
   if (activeHazard) {
     const updatedSevered = Array.from(new Set([...(activeHazard.severedRoads || []), severedRoad]));
-    await db.updateHazard(activeHazard._id, {
-      tiers: newTiers,
+    const hazardCoords = {
+      lat: activeHazard.location?.coordinates?.[1] || coords[1],
+      lng: activeHazard.location?.coordinates?.[0] || coords[0]
+    };
+
+    if (activeHazard.officialActive === true) {
+      officialAlert = generateOfficialGovtAlert({
+        locationName: activeHazard.simulatedBasin || 'Alaknanda Valley Corridor',
+        coordinates: hazardCoords,
+        rainfallRateMmPerHour: currentRain,
+        issuingAuthority: activeHazard.officialAlert?.issued || 'State Disaster Management Authority (USDMA)'
+      });
+    }
+
+    predictedAlert = generateAiClimaticPrediction({
+      locationName: `${activeHazard.simulatedBasin || 'Alaknanda Valley'} Projected Runout`,
+      coordinates: { lat: hazardCoords.lat + 0.012, lng: hazardCoords.lng + 0.012 },
+      currentRainfallRate: currentRain * expandedMultiplier,
+      soilPoreSaturation: 95.5,
+      leadTimeHours: 3
+    });
+
+    const hazardUpdates = {
+      prediction: predictedAlert,
+      predictedAlert: predictedAlert,
       severedRoads: updatedSevered,
       updatedAt: new Date().toISOString()
-    });
+    };
+
+    if (activeHazard.officialActive === true && officialAlert) {
+      hazardUpdates.tiers = officialAlert.tiers;
+      hazardUpdates.current = officialAlert;
+      hazardUpdates.officialAlert = officialAlert;
+    }
+
+    await db.updateHazard(activeHazard._id, hazardUpdates);
   }
 
   // Mark incident as evaluated
@@ -116,9 +151,14 @@ export async function runDisasterIntelligenceReActLoop(incident, io) {
     step: 6,
     type: 'OBSERVATION',
     tool: 'recalculateHazardTierRadii',
-    result: { status: 'SUCCESS', updated: true, newZone1RadiusKm: newTiers[0].radiusKm },
+    result: {
+      status: 'SUCCESS',
+      updated: true,
+      officialZone1Radius: officialAlert?.radius,
+      predictedZone1Radius: predictedAlert?.radius
+    },
     timestamp: new Date().toISOString(),
-    content: `HazardEvent contours recalibrated in GIS spatial database. Boundary buffer expanded by +${(newTiers[0].radiusKm * 0.25).toFixed(2)} km.`
+    content: `HazardEvent contours recalibrated. Official Zone 1: ${officialAlert?.radius}. AI Predicted T+3h Envelope: ${predictedAlert?.radius}.`
   };
   reasoningSteps.push(observation2);
 
@@ -128,7 +168,7 @@ export async function runDisasterIntelligenceReActLoop(incident, io) {
     type: 'FINAL_ASSESSMENT',
     timestamp: new Date().toISOString(),
     content: `[RE-ACT SYNTHESIS COMPLETE]:
-Dynamic threat recalculation verified. Zone 1 expanded to ${newTiers[0].radiusKm} km radius with mandatory evacuation directive. NH-306 transit corridor marked as SEVERED. Broadcast transmitted across all active Web and Mobile terminals.`
+Dynamic threat recalculation verified. Official Zone 1 established under USDMA directive. AI Model predicted T+3h expansion boundary with high-consequence talus surge. NH-58 transit corridor marked as SEVERED. Broadcast transmitted across all active terminals.`
   };
   reasoningSteps.push(finalAssessment);
 
@@ -139,6 +179,9 @@ Dynamic threat recalculation verified. Zone 1 expanded to ${newTiers[0].radiusKm
     reasoningSteps,
     finalAssessment: finalAssessment.content,
     newTiers,
+    officialAlert,
+    predictedAlert,
+    alertsList: [officialAlert, predictedAlert].filter(Boolean),
     severedRoads: [severedRoad]
   };
 
@@ -147,8 +190,13 @@ Dynamic threat recalculation verified. Zone 1 expanded to ${newTiers[0].radiusKm
     io.emit('AI_REASONING_UPDATE', evaluationResult);
     io.emit('HAZARD_UPDATED', {
       hazardId: activeHazard?._id,
-      tiers: newTiers,
-      severedRoads: [severedRoad, 'GS Road KM 18 Embankment Washout']
+      tiers: officialAlert?.tiers || newTiers,
+      current: officialAlert,
+      prediction: predictedAlert,
+      officialAlert,
+      predictedAlert,
+      alertsList: [officialAlert, predictedAlert].filter(Boolean),
+      severedRoads: [severedRoad, 'Helang-Joshimath Bypass Link Road']
     });
   }
 

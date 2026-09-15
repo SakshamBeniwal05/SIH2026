@@ -10,6 +10,7 @@ import { createHazardRouter } from './routes/hazardRoutes.js';
 import { createReportRouter } from './routes/reportRoutes.js';
 import { createMediaRouter } from './routes/mediaRoutes.js';
 import { createAiRouter } from './routes/aiRoutes.js';
+import { aiLivePredictionService } from './services/aiLivePredictionService.js';
 
 dotenv.config();
 
@@ -75,10 +76,54 @@ io.on('connection', (socket) => {
 
   // Send initial state upon connection
   db.getHazards().then(hazards => {
+    const active = hazards[0] || null;
+    if (active) {
+      if (active.expiresAt && new Date(active.expiresAt).getTime() <= Date.now()) {
+        active.status = 'standby';
+        active.officialActive = false;
+        active.current = null;
+        active.officialAlert = null;
+        active.tiers = [];
+        active.severedRoads = [];
+        active.vulnerableVillages = [];
+        active.alertsList = [];
+        active.expiresAt = null;
+      }
+      const livePrediction = aiLivePredictionService.getState().lastPrediction;
+      if (livePrediction && livePrediction.isCritical) {
+        active.prediction = livePrediction;
+        active.predictedAlert = livePrediction;
+      } else {
+        active.prediction = null;
+        active.predictedAlert = null;
+      }
+    }
     socket.emit('INITIAL_STATE', {
-      activeHazard: hazards[0] || null,
+      activeHazard: active,
       hazards
     });
+  });
+
+  // Real-time 12-second Auto-Request from Frontend
+  // Empties previous prediction, replaces fake simulation with live Open-Meteo data, and refills
+  socket.on('REQUEST_AI_REFRESH', async (payload) => {
+    console.log(`🔄 [Socket.io] REQUEST_AI_REFRESH received from client ${socket.id}`);
+    // Broadcast refresh start to empty previous prediction on all frontend clients
+    io.emit('AI_CYCLE_REFRESH_START', {
+      timestamp: new Date().toISOString(),
+      requestedBy: socket.id
+    });
+
+    // Clear fake/custom weather override so fake simulation is replaced by live web API data
+    if (payload?.clearFakeOverride !== false) {
+      aiLivePredictionService.clearCustomWeatherOverride();
+    }
+
+    // Reset autonomous timer so next background tick stays synchronized at 12 seconds
+    aiLivePredictionService.resetAutonomousTimer(12000);
+
+    // Recollect real-time atmospheric data from Open-Meteo and re-evaluate
+    await aiLivePredictionService.runCycle(payload?.stationId || null, null);
   });
 
   socket.on('disconnect', () => {
@@ -123,6 +168,11 @@ setInterval(async () => {
 // Initialize DB and start listening
 async function startServer() {
   await db.connect();
+
+  // Initialize and start live autonomous AI data fetch & prediction engine (only prediction data)
+  aiLivePredictionService.setIo(io);
+  aiLivePredictionService.startAutonomousLoop(12000);
+
   server.listen(PORT, () => {
     console.log(`=======================================================`);
     console.log(`🚀 [SIH 2026 Backend] Ingestion & Broadcast Gateway running`);

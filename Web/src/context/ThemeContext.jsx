@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { createAppTheme } from '../theme/muiTheme';
 
 const ThemeContext = createContext();
 
@@ -29,9 +32,14 @@ export function ThemeProvider({ children }) {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
+  const muiTheme = useMemo(() => createAppTheme(theme), [theme]);
+
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, isDark: theme === 'dark' }}>
-      {children}
+      <MuiThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        {children}
+      </MuiThemeProvider>
     </ThemeContext.Provider>
   );
 }

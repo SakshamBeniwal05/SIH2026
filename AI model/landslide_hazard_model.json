@@ -1,0 +1,372 @@
+{
+  "modelName": "Uttarakhand Landslide & Cloudburst AI Neural-Hazard Model",
+  "version": "2.0.0-UK-ONLY",
+  "trainedAt": "2026-09-14T15:26:32.428Z",
+  "geographicalScope": "STRICTLY_UTTARAKHAND_INDIA",
+  "bounds": {
+    "minLat": 28.7,
+    "maxLat": 31.45,
+    "minLng": 77.5,
+    "maxLng": 81.05
+  },
+  "trainingDatasetSize": 9,
+  "satelliteImageryAnalyzed": 5,
+  "hyperparameters": {
+    "slopeCoeff": 0.0824,
+    "meanRainMmPerHour": 130.56,
+    "meanRadiusKm": 9.36,
+    "criticalPrecipitationThresholdMmPerHour": 65,
+    "cloudburstDelugeThresholdMmPerHour": 100,
+    "poreSaturationCriticalThresholdPct": 88
+  },
+  "districtVulnerability": {
+    "Chamoli": {
+      "baseWeight": 1.54,
+      "basin": "Alaknanda River Basin",
+      "majorRoads": [
+        "NH-58"
+      ],
+      "center": {
+        "lat": 30.41,
+        "lng": 79.42
+      }
+    },
+    "Rudraprayag": {
+      "baseWeight": 1.36,
+      "basin": "Mandakini River Basin",
+      "majorRoads": [
+        "NH-107",
+        "NH-58"
+      ],
+      "center": {
+        "lat": 30.2844,
+        "lng": 78.9811
+      }
+    },
+    "Uttarkashi": {
+      "baseWeight": 1.36,
+      "basin": "Bhagirathi River Basin",
+      "majorRoads": [
+        "NH-134",
+        "NH-108"
+      ],
+      "center": {
+        "lat": 30.7268,
+        "lng": 78.4354
+      }
+    },
+    "Pithoragarh": {
+      "baseWeight": 1,
+      "basin": "Kali / Gori Ganga Basin",
+      "majorRoads": [
+        "NH-9"
+      ],
+      "center": {
+        "lat": 29.5829,
+        "lng": 80.2182
+      }
+    },
+    "Tehri Garhwal": {
+      "baseWeight": 1,
+      "basin": "Bhilangana River Basin",
+      "majorRoads": [
+        "NH-58",
+        "NH-34"
+      ],
+      "center": {
+        "lat": 30.38,
+        "lng": 78.48
+      }
+    },
+    "Pauri Garhwal": {
+      "baseWeight": 1,
+      "basin": "Nayyar River Basin",
+      "majorRoads": [
+        "NH-534",
+        "NH-58"
+      ],
+      "center": {
+        "lat": 30.15,
+        "lng": 78.78
+      }
+    },
+    "Dehradun": {
+      "baseWeight": 1.18,
+      "basin": "Song / Asan River Basin",
+      "majorRoads": [
+        "NH-7",
+        "NH-307"
+      ],
+      "center": {
+        "lat": 30.3165,
+        "lng": 78.0322
+      }
+    },
+    "Nainital": {
+      "baseWeight": 1.18,
+      "basin": "Kosi / Gaula River Basin",
+      "majorRoads": [
+        "NH-109"
+      ],
+      "center": {
+        "lat": 29.3919,
+        "lng": 79.4542
+      }
+    },
+    "Bageshwar": {
+      "baseWeight": 1,
+      "basin": "Saryu River Basin",
+      "majorRoads": [
+        "NH-109K"
+      ],
+      "center": {
+        "lat": 29.84,
+        "lng": 79.77
+      }
+    },
+    "Champawat": {
+      "baseWeight": 1,
+      "basin": "Lodhika / Sharda Basin",
+      "majorRoads": [
+        "NH-9"
+      ],
+      "center": {
+        "lat": 29.33,
+        "lng": 80.1
+      }
+    },
+    "Almora": {
+      "baseWeight": 1,
+      "basin": "Suyal / Kosi Basin",
+      "majorRoads": [
+        "NH-109"
+      ],
+      "center": {
+        "lat": 29.5971,
+        "lng": 79.6591
+      }
+    },
+    "Haridwar": {
+      "baseWeight": 1,
+      "basin": "Lower Ganga Plain",
+      "majorRoads": [
+        "NH-334",
+        "NH-7"
+      ],
+      "center": {
+        "lat": 29.9457,
+        "lng": 78.1642
+      }
+    },
+    "Udham Singh Nagar": {
+      "baseWeight": 1,
+      "basin": "Kalyani / Kumaon Foothills",
+      "majorRoads": [
+        "NH-9"
+      ],
+      "center": {
+        "lat": 28.98,
+        "lng": 79.4
+      }
+    }
+  },
+  "corridorVulnerabilityIndex": {
+    "NH-58": 0.94,
+    "NH-107": 0.91,
+    "NH-134": 0.82,
+    "NH-109": 0.78
+  },
+  "trainingEventsSummary": [
+    {
+      "id": "uk-2012-ukhimath",
+      "name": "2012 Ukhimath Landslide",
+      "location": "Ukhimath Town & Mandakini Valley",
+      "district": "Rudraprayag",
+      "coordinates": {
+        "lat": 30.517,
+        "lng": 79.1
+      },
+      "disasterType": "Debris Flow / Landslide",
+      "rainfallMmPerHour": 85,
+      "historicalHardMostRadiusKm": 3.5
+    },
+    {
+      "id": "uk-2012-bhagirathi",
+      "name": "2012 Bhagirathi Valley Cloudburst & Flash Flood",
+      "location": "Bhagirathi River Valley, Uttarkashi",
+      "district": "Uttarkashi",
+      "coordinates": {
+        "lat": 30.73,
+        "lng": 78.44
+      },
+      "disasterType": "Cloudburst + Flash Flood",
+      "rainfallMmPerHour": 110,
+      "historicalHardMostRadiusKm": 5
+    },
+    {
+      "id": "uk-2013-kedarnath",
+      "name": "2013 Kedarnath Glacial Lake Outburst & Cloudburst",
+      "location": "Kedarnath Valley, Chorabari Tal, Rambara",
+      "district": "Rudraprayag",
+      "coordinates": {
+        "lat": 30.7352,
+        "lng": 79.0669
+      },
+      "disasterType": "GLOF + Cloudburst + Catastrophic Talus Surge",
+      "rainfallMmPerHour": 220,
+      "historicalHardMostRadiusKm": 10
+    },
+    {
+      "id": "uk-2021-chamoli",
+      "name": "2021 Chamoli Rock/Ice Avalanche & Flash Surge",
+      "location": "Ronti Peak, Rishiganga & Tapovan Canyons",
+      "district": "Chamoli",
+      "coordinates": {
+        "lat": 30.45,
+        "lng": 79.63
+      },
+      "disasterType": "Rock/Ice Avalanche Debris Torrent",
+      "rainfallMmPerHour": 140,
+      "historicalHardMostRadiusKm": 15
+    },
+    {
+      "id": "uk-2021-nainital",
+      "name": "2021 Nainital–Ramgarh Extreme Cloudburst Deluge",
+      "location": "Nainital Core, Ramgarh, Mukteshwar",
+      "district": "Nainital",
+      "coordinates": {
+        "lat": 29.3919,
+        "lng": 79.4542
+      },
+      "disasterType": "Localized Microburst + Mudslide",
+      "rainfallMmPerHour": 160,
+      "historicalHardMostRadiusKm": 25
+    },
+    {
+      "id": "uk-2022-maldevta",
+      "name": "2022 Maldevta & Raipur Flash Flood Surge",
+      "location": "Maldevta, Sarkhet, Thano Canyon",
+      "district": "Dehradun",
+      "coordinates": {
+        "lat": 30.3165,
+        "lng": 78.12
+      },
+      "disasterType": "Orographic Cloudburst Scouring",
+      "rainfallMmPerHour": 175,
+      "historicalHardMostRadiusKm": 15
+    },
+    {
+      "id": "uk-2023-silkyara",
+      "name": "2023 Silkyara Bend-Barkot Tunnel Geo-Collapse",
+      "location": "Silkyara Portal, Yamunotri Highway Corridor",
+      "district": "Uttarkashi",
+      "coordinates": {
+        "lat": 30.75,
+        "lng": 78.26
+      },
+      "disasterType": "Shear-Zone Tunnel Cave-In / Rockfall",
+      "rainfallMmPerHour": 45,
+      "historicalHardMostRadiusKm": 2
+    },
+    {
+      "id": "uk-2023-joshimath",
+      "name": "2023 Joshimath Urban Land Subsidence Crisis",
+      "location": "Joshimath Town, Sunil, Manohar Bagh",
+      "district": "Chamoli",
+      "coordinates": {
+        "lat": 30.55,
+        "lng": 79.56
+      },
+      "disasterType": "Progressive Glacial-Moraine Subsidence",
+      "rainfallMmPerHour": 60,
+      "historicalHardMostRadiusKm": 3.5
+    },
+    {
+      "id": "uk-2026-alaknanda-projected",
+      "name": "2026 Upper Alaknanda Monsoon Shear Deluge (Projected Scenario)",
+      "location": "Helang KM 42, Pipalkoti, Alaknanda Gorge",
+      "district": "Chamoli",
+      "coordinates": {
+        "lat": 30.435,
+        "lng": 79.46
+      },
+      "disasterType": "Convective Cloudburst + Talus Slump",
+      "rainfallMmPerHour": 180,
+      "historicalHardMostRadiusKm": 5.2
+    }
+  ],
+  "palettes": {
+    "official": {
+      "zone1": {
+        "tierName": "Zone 1: Hard Most (Ground Zero)",
+        "strokeColor": "#B71C1C",
+        "fillColor": "#FFEBEE",
+        "fillOpacity": 0.45,
+        "borderStyle": "solid",
+        "riskTier": "CRITICAL_MANDATORY_EVACUATION"
+      },
+      "zone2": {
+        "tierName": "Zone 2: Most (Severe Impact)",
+        "strokeColor": "#E65100",
+        "fillColor": "#FFF3E0",
+        "fillOpacity": 0.35,
+        "borderStyle": "solid",
+        "riskTier": "SEVERE_LIFELINE_SEVERED"
+      },
+      "zone3": {
+        "tierName": "Zone 3: Some (Moderate Disruption)",
+        "strokeColor": "#FF8F00",
+        "fillColor": "#FFF8E1",
+        "fillOpacity": 0.25,
+        "borderStyle": "solid",
+        "riskTier": "MODERATE_DIVERSION"
+      },
+      "zone4": {
+        "tierName": "Zone 4: Negligible (Periphery Advisory)",
+        "strokeColor": "#01579B",
+        "fillColor": "#E1F5FE",
+        "fillOpacity": 0.15,
+        "borderStyle": "solid",
+        "riskTier": "BASELINE_OBSERVATION"
+      }
+    },
+    "predicted": {
+      "zone1": {
+        "tierName": "Pred-Zone 1: Core Debris Surge",
+        "strokeColor": "#7B1FA2",
+        "fillColor": "#F3E5F5",
+        "fillOpacity": 0.35,
+        "borderStyle": "dashed",
+        "dashArray": "6, 4",
+        "riskTier": "HIGH_LIKELIHOOD_SURGE"
+      },
+      "zone2": {
+        "tierName": "Pred-Zone 2: Secondary Runout & Talus Spread",
+        "strokeColor": "#C2185B",
+        "fillColor": "#FCE4EC",
+        "fillOpacity": 0.25,
+        "borderStyle": "dashed",
+        "dashArray": "6, 4",
+        "riskTier": "SEVERE_PREDICTED_DISRUPTION"
+      },
+      "zone3": {
+        "tierName": "Pred-Zone 3: Slope Washout & Drainage Vector",
+        "strokeColor": "#00838F",
+        "fillColor": "#E0F7FA",
+        "fillOpacity": 0.2,
+        "borderStyle": "dashed",
+        "dashArray": "6, 4",
+        "riskTier": "MODERATE_ADVISORY"
+      },
+      "zone4": {
+        "tierName": "Pred-Zone 4: Peripheral Risk Envelope",
+        "strokeColor": "#4527A0",
+        "fillColor": "#EDE7F6",
+        "fillOpacity": 0.12,
+        "borderStyle": "dashed",
+        "dashArray": "4, 6",
+        "riskTier": "BUFFER_ALERT"
+      }
+    }
+  }
+}

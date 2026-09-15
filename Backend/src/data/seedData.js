@@ -68,54 +68,20 @@ export const SEED_HAZARDS = [
     title: 'Severe Slope Failure & Debris Surge — Alaknanda Valley (Chamoli)',
     simulatedBasin: 'Alaknanda Valley (Chamoli / Joshimath)',
     rainfallRateMmPerHour: 165,
-    status: 'active',
+    status: 'standby',
     location: {
       type: 'Point',
       coordinates: [79.4200, 30.4100] // [lng, lat]
     },
-    tiers: [
-      {
-        tierName: 'Hard Most',
-        radiusMeters: 5200,
-        strokeColor: '#B71C1C',
-        fillColor: '#FFEBEE',
-        fillOpacity: 0.45,
-        evacuationMandated: true,
-        description: 'Ground Zero Chamoli — Critical slope failure on NH-58 shoulder. Immediate evacuation ordered.'
-      },
-      {
-        tierName: 'Most',
-        radiusMeters: 10100,
-        strokeColor: '#E65100',
-        fillColor: '#FFF3E0',
-        fillOpacity: 0.35,
-        evacuationMandated: true,
-        description: 'Severe Impact Zone — NH-58 Badrinath Lifeline severed at KM 42. Detour via Pipalkoti.'
-      },
-      {
-        tierName: 'Some',
-        radiusMeters: 17900,
-        strokeColor: '#FF8F00',
-        fillColor: '#FFF8E1',
-        fillOpacity: 0.25,
-        evacuationMandated: false,
-        description: 'Moderate Disruption — Slope creep, agricultural washouts, elevated river level advisory.'
-      },
-      {
-        tierName: 'Negligible',
-        radiusMeters: 30000,
-        strokeColor: '#01579B',
-        fillColor: '#E1F5FE',
-        fillOpacity: 0.15,
-        evacuationMandated: false,
-        description: 'Periphery Buffer — Doppler radar observation sector across Garhwal watershed.'
-      }
-    ],
-    severedRoads: [
-      'NH-58 (Rishikesh-Joshimath-Badrinath Lifeline)',
-      'Helang-Joshimath Bypass Link Road'
-    ],
-    vulnerableVillages: ['Helang', 'Pipalkoti', 'Joshimath Lower Ridge', 'Birahi', 'Tapovan'],
+    officialActive: false, // Official Government Alert is strictly triggered by Frontend Admin
+    current: null,
+    officialAlert: null,
+    prediction: null,
+    predictedAlert: null,
+    tiers: [],
+    alertsList: [],
+    severedRoads: [],
+    vulnerableVillages: [],
     createdAt: new Date(Date.now() - 3600000).toISOString(),
     updatedAt: new Date().toISOString()
   }

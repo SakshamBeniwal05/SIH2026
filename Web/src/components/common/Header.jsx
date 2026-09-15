@@ -66,7 +66,7 @@ export function Header({ onSelectSector }) {
                 ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#D32F2F] via-[#ED6C02] to-[#0288D1]'
                 : 'text-[#006096] font-bold'
             }`}>
-              TERRA-HUD // RISK OPS
+              LANDGUARD
             </span>
           </Link>
 
@@ -95,94 +95,107 @@ export function Header({ onSelectSector }) {
           </div>
         </div>
 
-        {/* Center: Tactical Search Icon Button & Popover */}
-        <div className="relative">
-          <button
-            onClick={() => setIsSearchOpen(prev => !prev)}
-            aria-label="Search corridors and sectors"
-            title="Search Corridors, Sensors & Sectors"
-            className={`p-1.5 border flex items-center justify-center transition-all ${
-              isSearchOpen
-                ? 'bg-[#0288D1] text-white border-[#01579B] shadow-[0_0_12px_rgba(2,136,209,0.5)]'
-                : isDark
-                  ? 'bg-[#10131b] border-[#27303e] text-slate-300 hover:text-[#0288D1] hover:border-[#0288D1]'
-                  : 'bg-white border-[#cbd5e1] text-slate-700 hover:text-[#0288D1] hover:border-[#0288D1]'
-            }`}
-          >
-            <Search className="w-4 h-4" />
-          </button>
-
-          {/* Tactical Search Popover */}
-          {isSearchOpen && (
-            <div
-              className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-80 sm:w-96 border shadow-2xl p-3 z-50 backdrop-blur-md ${
-                isDark ? 'bg-[#0b0f17]/98 border-[#27303e] text-slate-200' : 'bg-white/98 border-[#cbd5e1] text-slate-800'
+        {/* Center: Tactical Search Bar & Sector Jumps directly inside Navbar */}
+        <div className="flex-1 max-w-xl mx-2 md:mx-4 flex items-center gap-2 relative">
+          {/* Integrated Search Input */}
+          <div className={`flex-1 flex items-center border px-2.5 py-1 text-xs transition-all ${
+            isDark
+              ? 'bg-[#141824] border-[#27303e] focus-within:border-[#0288D1] focus-within:shadow-[0_0_8px_rgba(2,136,209,0.3)]'
+              : 'bg-[#f8fafc] border-[#cbd5e1] focus-within:border-[#0288D1] focus-within:shadow-[0_0_8px_rgba(2,136,209,0.2)]'
+          }`}>
+            <Search className="w-3.5 h-3.5 text-[#0288D1] mr-2 shrink-0" />
+            <input
+              type="text"
+              placeholder="Search corridors (NH-58, NH-107), basins, sensors..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`bg-transparent text-xs w-full focus:outline-none placeholder:text-slate-500 font-body ${
+                isDark ? 'text-slate-200' : 'text-slate-900'
               }`}
-            >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-700/40 mb-2.5">
-                <div className="flex items-center gap-1.5 font-headline font-bold text-[11px] uppercase tracking-wider text-[#0288D1]">
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Tactical Corridor Search</span>
-                </div>
-                <button
-                  onClick={() => setIsSearchOpen(false)}
-                  className="text-slate-400 hover:text-red-500 p-0.5 transition-colors"
-                  title="Close Search"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-slate-400 hover:text-slate-200 p-0.5"
+                title="Clear Search"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
 
-              {/* Input */}
-              <div className={`flex items-center border px-2.5 py-1.5 text-xs mb-2.5 ${
-                isDark ? 'bg-[#141824] border-[#27303e] focus-within:border-[#0288D1]' : 'bg-[#f8fafc] border-[#cbd5e1] focus-within:border-[#0288D1]'
-              }`}>
-                <Search className="w-3.5 h-3.5 text-[#0288D1] mr-2 shrink-0" />
-                <input
-                  autoFocus
-                  type="text"
-                  placeholder="Filter corridor (e.g. NH-58, NH-107), sensor, basin..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent text-xs w-full focus:outline-none placeholder:text-slate-500 font-body"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-slate-200">
-                    <X className="w-3 h-3" />
+          {/* Quick Uttarakhand Sector Jumps directly inside Navbar */}
+          <div className="hidden md:flex items-center gap-1 shrink-0">
+            <span className="text-[9px] font-headline uppercase font-bold text-slate-500 mr-0.5">
+              Jumps:
+            </span>
+            {[
+              { id: 'chamoli', name: 'Chamoli' },
+              { id: 'kedarnath', name: 'Kedarnath' },
+              { id: 'joshimath', name: 'Joshimath' },
+              { id: 'dehradun', name: 'Dehradun' },
+              { id: 'uttarkashi', name: 'Uttarkashi' }
+            ].map((sec) => (
+              <button
+                key={sec.id}
+                onClick={() => {
+                  if (onSelectSector) onSelectSector(sec.id);
+                  setSearchQuery('');
+                }}
+                className={`px-1.5 py-0.5 border text-[10px] font-headline font-bold uppercase transition-all cursor-pointer ${
+                  isDark
+                    ? 'bg-[#10131b] text-slate-300 border-[#27303e] hover:bg-[#0288D1] hover:text-white hover:border-[#0288D1]'
+                    : 'bg-white text-slate-700 border-[#cbd5e1] hover:bg-[#0288D1] hover:text-white hover:border-[#0288D1]'
+                }`}
+                title={`Jump to ${sec.name} Sector`}
+              >
+                {sec.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Instant Search Suggestions Dropdown (Docked directly beneath Navbar) */}
+          {searchQuery.trim() && (
+            <div className={`absolute left-0 top-full mt-1.5 w-full max-h-72 overflow-y-auto border shadow-2xl z-50 p-1 font-body text-xs backdrop-blur-md ${
+              isDark ? 'bg-[#0b0f17]/98 border-[#27303e] text-slate-200' : 'bg-white/98 border-[#cbd5e1] text-slate-800'
+            }`}>
+              {[
+                { id: 'chamoli', name: 'Chamoli / Joshimath Corridor', subtitle: 'Alaknanda Valley', tag: 'NH-58 Lifeline' },
+                { id: 'kedarnath', name: 'Kedarnath / Rudraprayag Corridor', subtitle: 'Mandakini Basin', tag: 'NH-107 Highway' },
+                { id: 'joshimath', name: 'Joshimath Sunil Ridge', subtitle: 'Upper Alaknanda Escarpment', tag: 'Active Creep' },
+                { id: 'dehradun', name: 'Dehradun / Maldevta Basin', subtitle: 'Song River Floodplain', tag: 'Doppler Radar' },
+                { id: 'uttarkashi', name: 'Uttarkashi / Silkyara Corridor', subtitle: 'Bhagirathi Valley', tag: 'NH-134 Bypass' },
+                { id: 'pithoragarh', name: 'Pithoragarh / Dharchula', subtitle: 'Kali Valley Corridor', tag: 'High Hazard' },
+                { id: 'nainital', name: 'Nainital / Bhowali Sector', subtitle: 'Kosi River Watershed', tag: 'Catchment' }
+              ]
+                .filter(t =>
+                  t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  t.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  t.tag.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (onSelectSector) onSelectSector(item.id);
+                      setSearchQuery('');
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 flex items-center justify-between transition-colors border-b last:border-b-0 cursor-pointer ${
+                      isDark ? 'border-slate-800/60 hover:bg-[#151a26]' : 'border-slate-100 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-[#0288D1] shrink-0" />
+                      <div>
+                        <span className="font-headline font-bold block text-xs text-[#0288D1]">{item.name}</span>
+                        <span className="text-[10px] text-slate-500">{item.subtitle}</span>
+                      </div>
+                    </div>
+                    <span className="px-1.5 py-0.5 text-[9px] font-telemetry uppercase font-bold border border-[#0288D1]/40 text-[#0288D1] bg-cyan-950/20">
+                      {item.tag}
+                    </span>
                   </button>
-                )}
-              </div>
-
-              {/* Quick Sectors */}
-              <div>
-                <div className="text-[10px] font-headline uppercase font-bold text-slate-400 mb-1.5">
-                  Uttarakhand Sector Jumps
-                </div>
-                <div className="flex flex-wrap gap-1.5 font-label text-[10px]">
-                  {[
-                    { id: 'chamoli', name: 'Chamoli' },
-                    { id: 'kedarnath', name: 'Kedarnath' },
-                    { id: 'joshimath', name: 'Joshimath' },
-                    { id: 'dehradun', name: 'Dehradun' },
-                    { id: 'uttarkashi', name: 'Uttarkashi' }
-                  ].map((sec) => (
-                    <button
-                      key={sec.id}
-                      onClick={() => {
-                        if (onSelectSector) onSelectSector(sec.id);
-                        setIsSearchOpen(false);
-                      }}
-                      className={`px-2 py-1 border transition-colors ${
-                        isDark
-                          ? 'bg-[#10131b] text-slate-300 border-[#27303e] hover:bg-[#0288D1] hover:text-white hover:border-[#0288D1]'
-                          : 'bg-white text-slate-700 border-[#cbd5e1] hover:bg-[#0288D1] hover:text-white hover:border-[#0288D1]'
-                      }`}
-                    >
-                      {sec.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                ))}
             </div>
           )}
         </div>

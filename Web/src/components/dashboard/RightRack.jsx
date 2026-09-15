@@ -11,12 +11,13 @@ import {
   AlertCircle,
   Terminal,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  RefreshCw
 } from 'lucide-react';
 
 export function RightRack({ isCollapsed = false, onToggleCollapse }) {
   const { isDark } = useTheme();
-  const { activeHazard, aiTraces, telemetry } = useSocket();
+  const { activeHazard, aiTraces, telemetry, aiRefreshCountdown } = useSocket();
 
   // Collapsed Rail View
   if (isCollapsed) {
@@ -125,6 +126,15 @@ export function RightRack({ isCollapsed = false, onToggleCollapse }) {
         <p className="font-body text-[11px] text-slate-400">
           Autonomous multi-turn loop correlating precipitation & crowdsourced field telemetry.
         </p>
+        <div className="flex items-center justify-between font-telemetry text-[10px] bg-black/40 px-2 py-1 border border-slate-800">
+          <span className="flex items-center gap-1.5 text-slate-300">
+            <RefreshCw className="w-3 h-3 text-cyan-400 animate-spin" style={{ animationDuration: '4s' }} />
+            <span>AI 12s Refresh Loop</span>
+          </span>
+          <span className="text-cyan-300 font-bold font-mono">
+            {aiRefreshCountdown}s
+          </span>
+        </div>
       </div>
 
       {/* Main Rack Body: AI Traces & Step-by-Step Reasoner */}

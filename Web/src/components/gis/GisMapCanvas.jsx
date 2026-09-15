@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useJsApiLoader, GoogleMap, Circle as GoogleCircle, Marker as GoogleMarker, Polyline as GooglePolyline, InfoWindow } from '@react-google-maps/api';
-import { MapContainer, TileLayer, Circle as LeafletCircle, Marker as LeafletMarker, Popup, Polyline as LeafletPolyline, useMap } from 'react-leaflet';
+import { useJsApiLoader, GoogleMap, Circle as GoogleCircle, Marker as GoogleMarker, Polyline as GooglePolyline, Polygon as GooglePolygon, InfoWindow } from '@react-google-maps/api';
+import { MapContainer, TileLayer, Circle as LeafletCircle, Marker as LeafletMarker, Popup, Polyline as LeafletPolyline, Polygon as LeafletPolygon, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useTheme } from '../../context/ThemeContext';
 import { useSocket } from '../../context/SocketContext';
 import { useGps, calculateDistanceKm, UTTARAKHAND_BOUNDS } from '../../context/GpsContext';
 import { darkMapStyle, lightMapStyle } from './googleMapStyles';
+import {
+  GOOGLE_MASK_PATHS,
+  LEAFLET_MASK_POSITIONS,
+  UTTARAKHAND_PERIMETER_GOOGLE,
+  UTTARAKHAND_PERIMETER_LEAFLET
+} from '../../data/uttarakhandMask';
 import {
   Layers,
   Crosshair,
@@ -79,22 +85,69 @@ const leafletUserGpsIcon = L.divIcon({
   iconAnchor: [16, 16]
 });
 
-// Helper to center the Leaflet map when sector changes
-function LeafletMapRecenter({ coords }) {
+// Tactical Pinpoint Target Marker Icon for Leaflet
+const leafletTargetIcon = L.divIcon({
+  className: 'custom-leaflet-target-pinpoint',
+  html: `
+    <div style="position: relative; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
+      <div style="position: absolute; width: 38px; height: 38px; border-radius: 50%; background: rgba(0, 229, 255, 0.5); animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+      <div style="width: 28px; height: 28px; border-radius: 50%; background: #D32F2F; border: 2.5px solid #ffffff; box-shadow: 0 0 14px #00E5FF; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 14px;">
+        🎯
+      </div>
+    </div>
+  `,
+  iconSize: [38, 38],
+  iconAnchor: [19, 19]
+});
+
+// Custom Vector Tactical Pin with Pulsating Ring for Leaflet
+const createLeafletTargetPinIcon = (color = '#D32F2F') => {
+  return L.divIcon({
+    className: 'custom-leaflet-target-pin',
+    html: `
+      <div style="position: relative; width: 44px; height: 52px; filter: drop-shadow(0 0 10px ${color});">
+        <svg width="44" height="52" viewBox="0 0 44 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 2 C11.5 2 3 10.5 3 21 C3 34 22 50 22 50 C22 50 41 34 41 21 C41 10.5 32.5 2 22 2 Z" fill="${color}" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="22" cy="21" r="9" fill="#090d14" stroke="#00E5FF" stroke-width="2"/>
+          <circle cx="22" cy="21" r="4" fill="#00E5FF"/>
+        </svg>
+        <div style="position: absolute; top: 12px; left: 13px; width: 18px; height: 18px; border-radius: 50%; background: rgba(0, 229, 255, 0.4); animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite; pointer-events: none;"></div>
+      </div>
+    `,
+    iconSize: [44, 52],
+    iconAnchor: [22, 50],
+    popupAnchor: [0, -48]
+  });
+};
+
+// Helper to center the Leaflet map when sector or target alert changes
+function LeafletMapRecenter({ coords, zoom }) {
   const map = useMap();
   useEffect(() => {
     if (coords && coords[0] && coords[1]) {
-      map.flyTo(coords, map.getZoom(), { animate: true, duration: 1.2 });
+      map.flyTo(coords, zoom || map.getZoom() || 12, { animate: true, duration: 1.0 });
     }
-  }, [coords, map]);
+  }, [coords, zoom, map]);
   return null;
 }
 
 const libraries = ['geometry', 'places'];
 
-export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
+export function GisMapCanvas({
+  selectedSectorCoords,
+  bottomOffset,
+  focusedTarget,
+  onClearFocus,
+  simulationTarget,
+  customPreviewTiers,
+  customPreviewEpicenter,
+  customAiPreviewZones
+}) {
   const { isDark } = useTheme();
-  const { activeHazard, reports, telemetry } = useSocket();
+  const { activeHazard, reports, telemetry, predictedAlert, isOfficialActive, alerts } = useSocket();
+  const activePrediction = (customAiPreviewZones && customAiPreviewZones.isCritical !== false)
+    ? customAiPreviewZones
+    : (predictedAlert && predictedAlert.isCritical !== false ? predictedAlert : null);
   const {
     gpsLocation,
     status: gpsStatus,
@@ -142,10 +195,11 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
   const [mapCenter, setMapCenter] = useState({ lat: 30.4100, lng: 79.4200 });
   const [activeInfoWindow, setActiveInfoWindow] = useState(null);
   const googleMapRef = useRef(null);
+  const leafletTargetMarkerRef = useRef(null);
 
   const leafletMaxBounds = [
-    [UTTARAKHAND_BOUNDS.south, UTTARAKHAND_BOUNDS.west],
-    [UTTARAKHAND_BOUNDS.north, UTTARAKHAND_BOUNDS.east]
+    [27.5, 76.5],
+    [32.5, 82.5]
   ];
 
   // Pan to GPS location when acquired or updated
@@ -175,6 +229,52 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
       }
     }
   }, [selectedSectorCoords, activeHazard]);
+
+  // Pan and activate InfoWindow whenever an emergency alert is clicked
+  useEffect(() => {
+    if (focusedTarget && focusedTarget.coords) {
+      const pos = { lat: focusedTarget.coords[0], lng: focusedTarget.coords[1] };
+      setMapCenter(pos);
+      if (googleMapRef.current) {
+        googleMapRef.current.panTo(pos);
+        googleMapRef.current.setZoom(focusedTarget.zoom || 13);
+      }
+      setActiveInfoWindow({
+        type: 'focusedTarget',
+        title: focusedTarget.title || 'ACTIVE EMERGENCY DIRECTIVE',
+        pos,
+        target: focusedTarget
+      });
+      const timer = setTimeout(() => {
+        if (leafletTargetMarkerRef.current) {
+          leafletTargetMarkerRef.current.openPopup();
+        }
+      }, 350);
+      return () => clearTimeout(timer);
+    } else {
+      // Clear target info window if focused target is stood down or removed
+      setActiveInfoWindow(prev => (prev?.type === 'focusedTarget' ? null : prev));
+    }
+  }, [focusedTarget]);
+
+  // Synchronize InfoWindow / popup removal when AI prediction is cleared or becomes safe
+  useEffect(() => {
+    if (!activePrediction || activePrediction.isCritical === false) {
+      setActiveInfoWindow(prev => {
+        if (
+          prev?.type === 'prediction' ||
+          (prev?.type === 'focusedTarget' && (
+            prev?.target?.type === 'prediction' ||
+            prev?.target?.id === 'ai-predicted-danger' ||
+            prev?.target?.id === 'ai-prediction-cycle'
+          ))
+        ) {
+          return null;
+        }
+        return prev;
+      });
+    }
+  }, [activePrediction]);
 
   const onGoogleMapLoad = useCallback((map) => {
     googleMapRef.current = map;
@@ -219,42 +319,47 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
       severed: activeHazard?.severedRoads?.some(r => r.includes('NH-107')),
       path: [
         { lat: 30.2800, lng: 78.9800 },
-        { lat: 30.3900, lng: 79.0300 },
+        { lat: 30.3800, lng: 79.0500 },
         { lat: 30.5200, lng: 79.0800 },
-        { lat: 30.6300, lng: 79.0100 },
-        { lat: 30.6700, lng: 79.0300 },
-        { lat: 30.7352, lng: 79.0669 }
+        { lat: 30.7300, lng: 79.0600 }
       ],
       leafletPath: [
         [30.2800, 78.9800],
-        [30.3900, 79.0300],
+        [30.3800, 79.0500],
         [30.5200, 79.0800],
-        [30.6300, 79.0100],
-        [30.6700, 79.0300],
-        [30.7352, 79.0669]
+        [30.7300, 79.0600]
       ]
     },
     {
       id: 'nh-134',
-      name: 'NH-134 (Silkyara Bend - Barkot Highway)',
+      name: 'NH-134 (Dharasu - Uttarkashi - Silkyara Corridor)',
       severed: activeHazard?.severedRoads?.some(r => r.includes('NH-134')),
       path: [
-        { lat: 30.6200, lng: 78.3100 },
-        { lat: 30.7500, lng: 78.2600 },
-        { lat: 30.8100, lng: 78.2100 }
+        { lat: 30.3800, lng: 78.3200 },
+        { lat: 30.5500, lng: 78.3800 },
+        { lat: 30.7300, lng: 78.4400 }
       ],
       leafletPath: [
-        [30.6200, 78.3100],
-        [30.7500, 78.2600],
-        [30.8100, 78.2100]
+        [30.3800, 78.3200],
+        [30.5500, 78.3800],
+        [30.7300, 78.4400]
       ]
     }
   ];
 
-  const tiers = activeHazard?.tiers || [];
-  const epicenterPos = activeHazard?.location?.coordinates
-    ? { lat: activeHazard.location.coordinates[1], lng: activeHazard.location.coordinates[0] }
-    : mapCenter;
+  const isGovtActive = isOfficialActive || activeHazard?.officialActive === true;
+  const isSimActive = activeHazard?.status === 'active' && (!activeHazard?.expiresAt || new Date(activeHazard.expiresAt).getTime() > Date.now());
+  const showHazardZones = (customPreviewTiers && customPreviewTiers.length > 0) || ((isGovtActive || isSimActive) && (activeHazard?.tiers?.length > 0));
+
+  const tiers = (customPreviewTiers && customPreviewTiers.length > 0)
+    ? customPreviewTiers
+    : (showHazardZones ? (activeHazard?.tiers || []) : []);
+
+  const epicenterPos = customPreviewEpicenter
+    ? { lat: customPreviewEpicenter.lat, lng: customPreviewEpicenter.lng }
+    : (activeHazard?.location?.coordinates
+        ? { lat: activeHazard.location.coordinates[1], lng: activeHazard.location.coordinates[0] }
+        : mapCenter);
 
   const leafletCenter = [mapCenter.lat, mapCenter.lng];
   const leafletEpicenter = [epicenterPos.lat, epicenterPos.lng];
@@ -266,6 +371,72 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
 
   const zone1RadiusKm = tiers[0] ? (tiers[0].radiusMeters / 1000).toFixed(2) : '4.80';
   const isInsideZone1 = userDistanceToEpicenter && parseFloat(userDistanceToEpicenter) <= parseFloat(zone1RadiusKm);
+
+  // Target Visuals & Impact Radius when an alert is focused
+  const targetLat = focusedTarget?.coords?.[0];
+  const targetLng = focusedTarget?.coords?.[1];
+  const isTargetPrediction = focusedTarget?.type === 'prediction' || focusedTarget?.id === 'ai-predicted-danger' || focusedTarget?.id === 'ai-prediction-cycle';
+  const isTargetExpiredPrediction = isTargetPrediction && (!activePrediction || activePrediction.isCritical === false);
+
+  const isTargetEpicenter = focusedTarget?.type === 'epicenter' || focusedTarget?.id === 'active-hazard-epicenter' || focusedTarget?.id === 'official-govt-directive-live';
+  const isTargetExpiredEpicenter = isTargetEpicenter && !isGovtActive && !(customPreviewTiers && customPreviewTiers.length > 0);
+
+  const isTargetSimulation = focusedTarget?.type === 'broadcast';
+  const isTargetExpiredSimulation = isTargetSimulation && !isSimActive && !(alerts || []).some(a => (a.simulationId && a.simulationId === focusedTarget.id) || a.basinName === focusedTarget.data?.basinName);
+
+  const isTargetExpired = isTargetExpiredPrediction || isTargetExpiredEpicenter || isTargetExpiredSimulation;
+  const hasTarget = Boolean(targetLat && targetLng) && !isTargetExpired;
+
+  // Auto-clear focus synchronously if target alert was stood down, expired or removed
+  useEffect(() => {
+    if (isTargetExpired) {
+      setActiveInfoWindow(prev => (prev?.type === 'focusedTarget' ? null : prev));
+      if (onClearFocus) {
+        onClearFocus();
+      }
+    }
+  }, [isTargetExpired, onClearFocus]);
+
+  const targetImpactRadius = (() => {
+    if (!focusedTarget) return 5000;
+    if (focusedTarget.data?.radiusMeters) return Number(focusedTarget.data.radiusMeters);
+    if (focusedTarget.radiusMeters) return Number(focusedTarget.radiusMeters);
+    if (typeof focusedTarget.data?.radius === 'number') return focusedTarget.data.radius * 1000;
+    if (typeof focusedTarget.data?.radius === 'string') {
+      const parsed = parseFloat(focusedTarget.data.radius);
+      if (!isNaN(parsed)) return parsed * 1000;
+    }
+    if (focusedTarget.type === 'epicenter' || focusedTarget.id === 'active-hazard-epicenter') {
+      return (tiers && tiers[0]?.radiusMeters) || 5200;
+    }
+    if (focusedTarget.type === 'prediction' || focusedTarget.id === 'ai-predicted-danger') {
+      return (activePrediction?.radiusMeters) || 7500;
+    }
+    if (focusedTarget.type === 'road') return 2500;
+    if (focusedTarget.type === 'report') return 1600;
+    if (focusedTarget.type === 'sensor') return 1200;
+    return 4500;
+  })();
+
+  const targetVisuals = (() => {
+    if (!focusedTarget) return { color: '#00E5FF', stroke: '#00B0FF', fill: '#80D8FF', badge: 'TACTICAL PINPOINT' };
+    if (focusedTarget.type === 'prediction' || focusedTarget.id === 'ai-predicted-danger') {
+      return { color: '#9C27B0', stroke: '#7B1FA2', fill: '#CE93D8', badge: 'AI CLIMATIC RUNOUT PREDICTION' };
+    }
+    if (focusedTarget.type === 'epicenter' || focusedTarget.id === 'active-hazard-epicenter') {
+      return { color: '#D32F2F', stroke: '#B71C1C', fill: '#EF5350', badge: 'GOVERNMENT EMERGENCY DIRECTIVE' };
+    }
+    if (focusedTarget.type === 'road') {
+      return { color: '#EF6C00', stroke: '#E65100', fill: '#FFA726', badge: 'SEVERED HIGHWAY LIFELINE' };
+    }
+    if (focusedTarget.type === 'report') {
+      return { color: '#E65100', stroke: '#BF360C', fill: '#FFAB91', badge: 'GROUND ZERO CITIZEN REPORT' };
+    }
+    if (focusedTarget.type === 'sensor') {
+      return { color: '#00E676', stroke: '#00C853', fill: '#B9F6CA', badge: 'IoT TELEMETRY SENSOR' };
+    }
+    return { color: '#00E5FF', stroke: '#00B0FF', fill: '#80D8FF', badge: 'TACTICAL SECTOR DIRECTIVE' };
+  })();
 
   // Tile layer URL for Leaflet fallback
   const darkTileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
@@ -295,15 +466,43 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
             fullscreenControl: false,
             backgroundColor: isDark ? '#090d14' : '#f8fafc',
             restriction: {
-              latLngBounds: UTTARAKHAND_BOUNDS,
-              strictBounds: false
+              latLngBounds: {
+                north: 32.5,
+                south: 27.5,
+                east: 82.5,
+                west: 76.5
+              },
+              strictBounds: true
             },
-            minZoom: 8,
+            minZoom: 7,
             maxZoom: 18
           }}
         >
-          {/* 1. Calibrated Concentric 4-Tier Hazard Zones */}
-          {layers.zones && tiers.map((tier, idx) => {
+          {/* Uttarakhand Inverse Boundary Mask & Glowing State Perimeter */}
+          <GooglePolygon
+            paths={GOOGLE_MASK_PATHS}
+            options={{
+              fillColor: isDark ? '#05070a' : '#e2e8f0',
+              fillOpacity: 1.0,
+              strokeColor: '#00E5FF',
+              strokeOpacity: 1.0,
+              strokeWeight: 2.0,
+              clickable: false,
+              zIndex: 2
+            }}
+          />
+          <GooglePolyline
+            path={UTTARAKHAND_PERIMETER_GOOGLE}
+            options={{
+              strokeColor: '#00E5FF',
+              strokeOpacity: 1,
+              strokeWeight: 3.0,
+              zIndex: 3
+            }}
+          />
+
+          {/* 1. Official Emergency Directive (Priority 1): Solid Radial Gradient 4-Tier Hazard Zones */}
+          {layers.zones && showHazardZones && tiers.length > 0 && tiers.map((tier, idx) => {
             const reversed = [...tiers].reverse();
             const current = reversed[idx];
             if (!current) return null;
@@ -315,16 +514,17 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
                 radius={current.radiusMeters}
                 options={{
                   strokeColor: current.strokeColor,
-                  strokeOpacity: 0.9,
-                  strokeWeight: current.tierName === 'Hard Most' ? 2.5 : 1.5,
+                  strokeOpacity: 0.95,
+                  strokeWeight: current.tierName === 'Hard Most' ? 3 : 1.8,
                   fillColor: current.fillColor,
-                  fillOpacity: isDark ? current.fillOpacity * 0.7 : current.fillOpacity * 0.5,
-                  clickable: true
+                  fillOpacity: isDark ? current.fillOpacity * 0.75 : current.fillOpacity * 0.55,
+                  clickable: true,
+                  zIndex: 3
                 }}
                 onClick={() => {
                   setActiveInfoWindow({
                     type: 'zone',
-                    title: `${current.tierName} Zone // Risk Matrix`,
+                    title: `${current.tierName} Zone // Official Directive`,
                     radius: (current.radiusMeters / 1000).toFixed(2),
                     description: current.description || (current.evacuationMandated ? 'Mandatory Evacuation Enacted.' : 'Elevated Vigilance Buffer.'),
                     pos: epicenterPos
@@ -334,20 +534,98 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
             );
           })}
 
+          {/* 1.1 AI Climatic Prediction (Priority 2): Violet Radial Gradient Circles (Only when Critical) */}
+          {layers.zones && activePrediction && activePrediction.isCritical !== false && activePrediction.coordinates && (
+            <>
+              {/* Outer Prediction Warning Cordon */}
+              <GoogleCircle
+                center={{ lat: activePrediction.coordinates.lat, lng: activePrediction.coordinates.lng }}
+                radius={Math.round((activePrediction.radiusMeters || 7500) * 1.45)}
+                options={{
+                  strokeColor: '#7B1FA2',
+                  strokeOpacity: 0.8,
+                  strokeWeight: 1.5,
+                  fillColor: '#E1BEE7',
+                  fillOpacity: isDark ? 0.12 : 0.18,
+                  clickable: false,
+                  zIndex: 3
+                }}
+              />
+              {/* Secondary Moderate Hazard Ring */}
+              <GoogleCircle
+                center={{ lat: activePrediction.coordinates.lat, lng: activePrediction.coordinates.lng }}
+                radius={Math.round(activePrediction.radiusMeters || 7500)}
+                options={{
+                  strokeColor: '#8E24AA',
+                  strokeOpacity: 0.9,
+                  strokeWeight: 2,
+                  fillColor: '#CE93D8',
+                  fillOpacity: isDark ? 0.24 : 0.30,
+                  clickable: true,
+                  zIndex: 4
+                }}
+                onClick={() => {
+                  setActiveInfoWindow({
+                    type: 'prediction',
+                    title: 'AI PREDICTED RUNOUT CORRIDOR',
+                    location: activePrediction.locationName || 'Projected Runout Corridor',
+                    radius: activePrediction.radius || `${((activePrediction.radiusMeters || 7500)/1000).toFixed(1)} km`,
+                    riskScore: activePrediction.riskScore || 0,
+                    rain: activePrediction.currentRainfallRate || 0,
+                    saturation: activePrediction.soilPoreSaturation || 0,
+                    pos: { lat: activePrediction.coordinates.lat, lng: activePrediction.coordinates.lng }
+                  });
+                }}
+              />
+              {/* Core High Hazard Ring */}
+              <GoogleCircle
+                center={{ lat: activePrediction.coordinates.lat, lng: activePrediction.coordinates.lng }}
+                radius={Math.round((activePrediction.radiusMeters || 7500) * 0.5)}
+                options={{
+                  strokeColor: '#4A148C',
+                  strokeOpacity: 0.95,
+                  strokeWeight: 2.5,
+                  fillColor: '#BA68C8',
+                  fillOpacity: isDark ? 0.38 : 0.45,
+                  clickable: false,
+                  zIndex: 5
+                }}
+              />
+              <GoogleMarker
+                position={{ lat: activePrediction.coordinates.lat, lng: activePrediction.coordinates.lng }}
+                title="AI Climatic Predicted Storm Epicenter"
+                onClick={() => {
+                  setActiveInfoWindow({
+                    type: 'prediction',
+                    title: 'AI PREDICTED STORM HAZARD',
+                    location: activePrediction.locationName || 'Projected Runout Corridor',
+                    radius: activePrediction.radius || `${((activePrediction.radiusMeters || 7500)/1000).toFixed(1)} km`,
+                    riskScore: activePrediction.riskScore || 0,
+                    rain: activePrediction.currentRainfallRate || 0,
+                    saturation: activePrediction.soilPoreSaturation || 0,
+                    pos: { lat: activePrediction.coordinates.lat, lng: activePrediction.coordinates.lng }
+                  });
+                }}
+              />
+            </>
+          )}
+
           {/* 2. Critical Epicenter Marker */}
-          <GoogleMarker
-            position={epicenterPos}
-            title="Simulated Storm Epicenter"
-            onClick={() => {
-              setActiveInfoWindow({
-                type: 'epicenter',
-                title: 'SIMULATED STORM EPICENTER',
-                basin: activeHazard?.simulatedBasin || 'Active Basin',
-                rain: activeHazard?.rainfallRateMmPerHour || 180,
-                pos: epicenterPos
-              });
-            }}
-          />
+          {showHazardZones && (
+            <GoogleMarker
+              position={epicenterPos}
+              title="Simulated Storm Epicenter"
+              onClick={() => {
+                setActiveInfoWindow({
+                  type: 'epicenter',
+                  title: 'SIMULATED STORM EPICENTER',
+                  basin: activeHazard?.simulatedBasin || 'Active Basin',
+                  rain: activeHazard?.rainfallRateMmPerHour || 180,
+                  pos: epicenterPos
+                });
+              }}
+            />
+          )}
 
           {/* 3. Road Network Overlays */}
           {layers.roads && roadCorridors.map(road => (
@@ -446,6 +724,87 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
             </>
           )}
 
+          {/* Focused Alert Pinpoint Marker & Concentric Impact Radius (Google Maps) */}
+          {hasTarget && (
+            <>
+              {/* Outer Impact Radius Circle */}
+              <GoogleCircle
+                center={{ lat: targetLat, lng: targetLng }}
+                radius={targetImpactRadius}
+                options={{
+                  strokeColor: targetVisuals.stroke,
+                  strokeOpacity: 0.9,
+                  strokeWeight: 2,
+                  fillColor: targetVisuals.fill || targetVisuals.color,
+                  fillOpacity: isDark ? 0.20 : 0.28,
+                  clickable: true,
+                  zIndex: 15
+                }}
+                onClick={() => {
+                  setActiveInfoWindow({
+                    type: 'focusedTarget',
+                    title: focusedTarget.title || 'ACTIVE EMERGENCY DIRECTIVE',
+                    pos: { lat: targetLat, lng: targetLng },
+                    target: focusedTarget
+                  });
+                }}
+              />
+              {/* Inner Core Radius Circle */}
+              <GoogleCircle
+                center={{ lat: targetLat, lng: targetLng }}
+                radius={Math.round(targetImpactRadius * 0.45)}
+                options={{
+                  strokeColor: targetVisuals.color,
+                  strokeOpacity: 0.95,
+                  strokeWeight: 2.5,
+                  fillColor: targetVisuals.color,
+                  fillOpacity: isDark ? 0.28 : 0.35,
+                  clickable: false,
+                  zIndex: 16
+                }}
+              />
+              {/* Tactical Crosshair Reticle Ring */}
+              <GoogleCircle
+                center={{ lat: targetLat, lng: targetLng }}
+                radius={Math.min(650, targetImpactRadius * 0.15)}
+                options={{
+                  strokeColor: '#00E5FF',
+                  strokeOpacity: 1,
+                  strokeWeight: 2.5,
+                  fillColor: '#00E5FF',
+                  fillOpacity: 0.15,
+                  clickable: false,
+                  zIndex: 17
+                }}
+              />
+              {/* Pinpoint Target Marker */}
+              <GoogleMarker
+                position={{ lat: targetLat, lng: targetLng }}
+                zIndex={100}
+                onClick={() => {
+                  setActiveInfoWindow({
+                    type: 'focusedTarget',
+                    title: focusedTarget.title || 'ACTIVE EMERGENCY DIRECTIVE',
+                    pos: { lat: targetLat, lng: targetLng },
+                    target: focusedTarget
+                  });
+                }}
+                icon={
+                  window.google?.maps?.SymbolPath
+                    ? {
+                        path: 'M 0,0 C -2,-20 -10,-22 -10,-32 A 10,10 0 1,1 10,-32 C 10,-22 2,-20 0,0 Z',
+                        scale: 1.4,
+                        fillColor: targetVisuals.color,
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2.5
+                      }
+                    : undefined
+                }
+              />
+            </>
+          )}
+
           {/* Active InfoWindow */}
           {activeInfoWindow && (
             <InfoWindow
@@ -453,6 +812,86 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
               onCloseClick={() => setActiveInfoWindow(null)}
             >
               <div className="p-2 space-y-1.5 max-w-xs text-xs font-sans text-slate-900">
+                {activeInfoWindow.type === 'focusedTarget' && (
+                  <div className="space-y-2 min-w-[240px] max-w-xs">
+                    {/* Header with Dual Controls: Minimize (—) vs Clear (✕) */}
+                    <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                      <div className="flex items-center gap-1.5 font-bold uppercase text-[10px]" style={{ color: targetVisuals.color }}>
+                        <span className="w-2 h-2 rounded-full inline-block animate-ping" style={{ backgroundColor: targetVisuals.color }} />
+                        <span>{focusedTarget?.badge || targetVisuals.badge}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setActiveInfoWindow(null)}
+                          className="px-1.5 py-0.5 text-[11px] font-bold text-slate-500 hover:bg-slate-200 rounded transition-colors cursor-pointer"
+                          title="Minimize mini-window (keeps pinpoint & radius active)"
+                        >
+                          —
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveInfoWindow(null);
+                            if (onClearFocus) onClearFocus();
+                          }}
+                          className="px-1.5 py-0.5 text-[11px] font-bold text-red-600 hover:bg-red-100 rounded transition-colors cursor-pointer"
+                          title="Clear pinpoint & radius from map"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="font-bold text-xs uppercase text-slate-900 mb-0.5">
+                        {focusedTarget?.title || 'ACTIVE EMERGENCY DIRECTIVE'}
+                      </div>
+                      <div className="text-[11px] text-slate-600 flex items-center justify-between">
+                        <span>Coordinates:</span>
+                        <strong className="font-mono">{targetLat?.toFixed(4)}°N, {targetLng?.toFixed(4)}°E</strong>
+                      </div>
+                      <div className="text-[11px] text-slate-600 flex items-center justify-between">
+                        <span>Impact Radius:</span>
+                        <strong className="text-red-600 font-mono">{(targetImpactRadius / 1000).toFixed(1)} km</strong>
+                      </div>
+                      {focusedTarget?.basin && (
+                        <div className="text-[11px] text-slate-600 flex items-center justify-between">
+                          <span>River Basin:</span>
+                          <strong>{focusedTarget.basin}</strong>
+                        </div>
+                      )}
+                      {focusedTarget?.rain && (
+                        <div className="text-[11px] text-slate-600 flex items-center justify-between">
+                          <span>Rainfall Rate:</span>
+                          <strong className="text-red-600">{focusedTarget.rain} mm/hr</strong>
+                        </div>
+                      )}
+                      {focusedTarget?.data?.description && (
+                        <p className="mt-1 text-[11px] text-slate-700 bg-slate-50 p-1 rounded border border-slate-200">
+                          {focusedTarget.data.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="pt-1.5 border-t border-slate-200 flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          setActiveInfoWindow(null);
+                          if (onClearFocus) onClearFocus();
+                        }}
+                        className="flex-1 py-1 px-2 bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] uppercase transition-colors text-center cursor-pointer"
+                      >
+                        ✕ Clear Pinpoint
+                      </button>
+                      <button
+                        onClick={() => setActiveInfoWindow(null)}
+                        className="py-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] uppercase transition-colors cursor-pointer"
+                        title="Keep pinpoint & radius active, minimize popup"
+                      >
+                        Minimize
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {activeInfoWindow.type === 'zone' && (
                   <>
                     <div className="font-bold text-xs uppercase text-red-600">
@@ -533,6 +972,20 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
                     </div>
                   </div>
                 )}
+                {activeInfoWindow.type === 'prediction' && (
+                  <div className="space-y-1">
+                    <div className="font-bold text-xs uppercase text-purple-700 flex items-center gap-1 border-b pb-1">
+                      <span>{activeInfoWindow.title}</span>
+                    </div>
+                    <div className="text-[11px] text-slate-700 space-y-0.5">
+                      <div>Corridor: <strong>{activeInfoWindow.location}</strong></div>
+                      <div>Projected Runout: <strong>{activeInfoWindow.radius}</strong></div>
+                      <div>Risk Probability: <strong className="text-red-600">{activeInfoWindow.riskScore}%</strong></div>
+                      <div>Effective Rain: <strong>{activeInfoWindow.rain} mm/hr</strong></div>
+                      <div>Soil Saturation: <strong>{activeInfoWindow.saturation}%</strong></div>
+                    </div>
+                  </div>
+                )}
               </div>
             </InfoWindow>
           )}
@@ -542,13 +995,13 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
         <MapContainer
           center={leafletCenter}
           zoom={10}
-          minZoom={8}
+          minZoom={7}
           maxBounds={leafletMaxBounds}
-          maxBoundsViscosity={0.8}
+          maxBoundsViscosity={1.0}
           className="w-full h-full z-0"
           zoomControl={false}
         >
-          <LeafletMapRecenter coords={leafletCenter} />
+          <LeafletMapRecenter coords={focusedTarget?.coords || selectedSectorCoords || leafletCenter} zoom={focusedTarget?.zoom || 11} />
 
           <TileLayer
             attribution='&copy; <a href="https://carto.com/">CARTO</a>, OpenStreetMap'
@@ -556,8 +1009,30 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
             maxZoom={19}
           />
 
-          {/* Concentric 4-Tier Hazard Zones */}
-          {layers.zones && tiers.map((tier, idx) => {
+          {/* Uttarakhand Inverse Boundary Mask & Glowing State Perimeter */}
+          <LeafletPolygon
+            positions={LEAFLET_MASK_POSITIONS}
+            interactive={false}
+            pathOptions={{
+              fillColor: isDark ? '#05070a' : '#e2e8f0',
+              fillOpacity: 1.0,
+              color: '#00E5FF',
+              weight: 2.0,
+              fillRule: 'evenodd'
+            }}
+          />
+          <LeafletPolyline
+            positions={UTTARAKHAND_PERIMETER_LEAFLET}
+            interactive={false}
+            pathOptions={{
+              color: '#00E5FF',
+              weight: 3.0,
+              opacity: 1
+            }}
+          />
+
+          {/* 1. Official Emergency Directive (Priority 1): Concentric 4-Tier Hazard Zones */}
+          {layers.zones && showHazardZones && tiers.length > 0 && tiers.map((tier, idx) => {
             const reversedTiers = [...tiers].reverse();
             const current = reversedTiers[idx];
             if (!current) return null;
@@ -570,15 +1045,15 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
                 pathOptions={{
                   color: current.strokeColor,
                   fillColor: current.fillColor,
-                  fillOpacity: isDark ? current.fillOpacity * 0.7 : current.fillOpacity * 0.5,
-                  weight: current.tierName === 'Hard Most' ? 2.5 : 1.5,
+                  fillOpacity: isDark ? current.fillOpacity * 0.75 : current.fillOpacity * 0.55,
+                  weight: current.tierName === 'Hard Most' ? 3 : 1.8,
                   dashArray: current.tierName === 'Negligible' ? '4, 4' : null
                 }}
               >
                 <Popup>
                   <div className="p-2 space-y-1 text-xs">
                     <div className="font-headline font-bold uppercase" style={{ color: current.strokeColor }}>
-                      {current.tierName} Zone // Risk Matrix
+                      {current.tierName} Zone // Official Directive
                     </div>
                     <p className="font-body text-slate-300">
                       Radius: <strong>{(current.radiusMeters / 1000).toFixed(2)} km</strong>
@@ -592,16 +1067,68 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
             );
           })}
 
+          {/* 1.1 AI Climatic Prediction (Priority 2): Violet Radial Gradient Circles (Only when Critical) */}
+          {layers.zones && activePrediction && activePrediction.isCritical !== false && activePrediction.coordinates && (
+            <>
+              <LeafletCircle
+                center={[activePrediction.coordinates.lat, activePrediction.coordinates.lng]}
+                radius={Math.round((activePrediction.radiusMeters || 7500) * 1.45)}
+                pathOptions={{
+                  color: '#7B1FA2',
+                  fillColor: '#E1BEE7',
+                  fillOpacity: isDark ? 0.12 : 0.18,
+                  weight: 1.5,
+                  dashArray: '6, 6'
+                }}
+              />
+              <LeafletCircle
+                center={[activePrediction.coordinates.lat, activePrediction.coordinates.lng]}
+                radius={Math.round(activePrediction.radiusMeters || 7500)}
+                pathOptions={{
+                  color: '#8E24AA',
+                  fillColor: '#CE93D8',
+                  fillOpacity: isDark ? 0.24 : 0.30,
+                  weight: 2,
+                  dashArray: '4, 4'
+                }}
+              >
+                <Popup>
+                  <div className="p-2 space-y-1 text-xs font-telemetry">
+                    <div className="font-headline font-bold text-purple-400 uppercase">
+                      AI PREDICTED RUNOUT CORRIDOR
+                    </div>
+                    <p className="text-slate-300">Location: <strong>{activePrediction.locationName || 'Projected Corridor'}</strong></p>
+                    <p className="text-slate-300">Risk Score: <strong className="text-red-400">{activePrediction.riskScore || 0}%</strong></p>
+                    <p className="text-slate-300">Runout Radius: <strong>{activePrediction.radius || '7.5 km'}</strong></p>
+                    <p className="text-slate-300">Effective Rain: <strong>{activePrediction.currentRainfallRate || 0} mm/hr</strong></p>
+                  </div>
+                </Popup>
+              </LeafletCircle>
+              <LeafletCircle
+                center={[activePrediction.coordinates.lat, activePrediction.coordinates.lng]}
+                radius={Math.round((activePrediction.radiusMeters || 7500) * 0.5)}
+                pathOptions={{
+                  color: '#4A148C',
+                  fillColor: '#BA68C8',
+                  fillOpacity: isDark ? 0.38 : 0.45,
+                  weight: 2.5
+                }}
+              />
+            </>
+          )}
+
           {/* Epicenter Marker */}
-          <LeafletMarker position={leafletEpicenter} icon={leafletEpicenterIcon}>
-            <Popup>
-              <div className="p-2 text-xs space-y-1">
-                <span className="font-headline font-bold text-[#D32F2F]">SIMULATED STORM EPICENTER</span>
-                <p className="font-body text-slate-300">Basin: {activeHazard?.simulatedBasin || 'Active Basin'}</p>
-                <p className="font-telemetry text-red-400 font-bold">{activeHazard?.rainfallRateMmPerHour || 180} mm/hr Accumulation</p>
-              </div>
-            </Popup>
-          </LeafletMarker>
+          {showHazardZones && (
+            <LeafletMarker position={leafletEpicenter} icon={leafletEpicenterIcon}>
+              <Popup>
+                <div className="p-2 text-xs space-y-1">
+                  <span className="font-headline font-bold text-[#D32F2F]">SIMULATED STORM EPICENTER</span>
+                  <p className="font-body text-slate-300">Basin: {activeHazard?.simulatedBasin || 'Active Basin'}</p>
+                  <p className="font-telemetry text-red-400 font-bold">{activeHazard?.rainfallRateMmPerHour || 180} mm/hr Accumulation</p>
+                </div>
+              </Popup>
+            </LeafletMarker>
+          )}
 
           {/* Road Network Overlays */}
           {layers.roads && roadCorridors.map(road => (
@@ -724,16 +1251,155 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
               </LeafletMarker>
             </>
           )}
+
+          {/* Focused Alert Pinpoint Marker & Concentric Impact Radius (Leaflet) */}
+          {hasTarget && (
+            <>
+              {/* Outer Impact Radius Circle */}
+              <LeafletCircle
+                center={[targetLat, targetLng]}
+                radius={targetImpactRadius}
+                pathOptions={{
+                  color: targetVisuals.stroke,
+                  weight: 2,
+                  fillColor: targetVisuals.fill || targetVisuals.color,
+                  fillOpacity: isDark ? 0.20 : 0.28
+                }}
+                eventHandlers={{
+                  click: () => {
+                    if (leafletTargetMarkerRef.current) {
+                      leafletTargetMarkerRef.current.openPopup();
+                    }
+                  }
+                }}
+              />
+              {/* Inner Core Radius Circle */}
+              <LeafletCircle
+                center={[targetLat, targetLng]}
+                radius={Math.round(targetImpactRadius * 0.45)}
+                pathOptions={{
+                  color: targetVisuals.color,
+                  weight: 2.5,
+                  fillColor: targetVisuals.color,
+                  fillOpacity: isDark ? 0.28 : 0.35
+                }}
+              />
+              {/* Tactical Crosshair Reticle Ring */}
+              <LeafletCircle
+                center={[targetLat, targetLng]}
+                radius={Math.min(650, targetImpactRadius * 0.15)}
+                pathOptions={{
+                  color: '#00E5FF',
+                  weight: 2.5,
+                  fillColor: '#00E5FF',
+                  fillOpacity: 0.15,
+                  dashArray: '5, 5'
+                }}
+              />
+              {/* Pinpoint Target Marker */}
+              <LeafletMarker
+                ref={leafletTargetMarkerRef}
+                position={[targetLat, targetLng]}
+                icon={createLeafletTargetPinIcon(targetVisuals.color)}
+                zIndexOffset={1000}
+              >
+                <Popup minWidth={260} maxWidth={320} className="custom-tactical-popup">
+                  <div className="p-1.5 space-y-2 text-xs font-sans text-slate-900">
+                    {/* Header with Dual Controls: Minimize (—) vs Clear (✕) */}
+                    <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                      <div className="flex items-center gap-1.5 font-bold uppercase text-[10px]" style={{ color: targetVisuals.color }}>
+                        <span className="w-2 h-2 rounded-full inline-block animate-ping" style={{ backgroundColor: targetVisuals.color }} />
+                        <span>{focusedTarget?.badge || targetVisuals.badge}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            if (leafletTargetMarkerRef.current) {
+                              leafletTargetMarkerRef.current.closePopup();
+                            }
+                          }}
+                          className="px-1.5 py-0.5 text-[11px] font-bold text-slate-500 hover:bg-slate-200 rounded transition-colors cursor-pointer"
+                          title="Minimize mini-window (keeps pinpoint & radius active)"
+                        >
+                          —
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (leafletTargetMarkerRef.current) {
+                              leafletTargetMarkerRef.current.closePopup();
+                            }
+                            if (onClearFocus) onClearFocus();
+                          }}
+                          className="px-1.5 py-0.5 text-[11px] font-bold text-red-600 hover:bg-red-100 rounded transition-colors cursor-pointer"
+                          title="Clear pinpoint & radius from map"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="font-bold text-xs uppercase text-slate-900 mb-0.5">
+                        {focusedTarget?.title || 'ACTIVE EMERGENCY DIRECTIVE'}
+                      </div>
+                      <div className="text-[11px] text-slate-600 flex items-center justify-between">
+                        <span>Coordinates:</span>
+                        <strong className="font-mono">{targetLat?.toFixed(4)}°N, {targetLng?.toFixed(4)}°E</strong>
+                      </div>
+                      <div className="text-[11px] text-slate-600 flex items-center justify-between">
+                        <span>Impact Radius:</span>
+                        <strong className="text-red-600 font-mono">{(targetImpactRadius / 1000).toFixed(1)} km</strong>
+                      </div>
+                      {focusedTarget?.basin && (
+                        <div className="text-[11px] text-slate-600 flex items-center justify-between">
+                          <span>River Basin:</span>
+                          <strong>{focusedTarget.basin}</strong>
+                        </div>
+                      )}
+                      {focusedTarget?.rain && (
+                        <div className="text-[11px] text-slate-600 flex items-center justify-between">
+                          <span>Rainfall Rate:</span>
+                          <strong className="text-red-600">{focusedTarget.rain} mm/hr</strong>
+                        </div>
+                      )}
+                      {focusedTarget?.data?.description && (
+                        <p className="mt-1 text-[11px] text-slate-700 bg-slate-50 p-1 rounded border border-slate-200">
+                          {focusedTarget.data.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="pt-1.5 border-t border-slate-200 flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          if (leafletTargetMarkerRef.current) {
+                            leafletTargetMarkerRef.current.closePopup();
+                          }
+                          if (onClearFocus) onClearFocus();
+                        }}
+                        className="flex-1 py-1 px-2 bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] uppercase transition-colors text-center cursor-pointer"
+                      >
+                        ✕ Clear Pinpoint
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (leafletTargetMarkerRef.current) {
+                            leafletTargetMarkerRef.current.closePopup();
+                          }
+                        }}
+                        className="py-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] uppercase transition-colors cursor-pointer"
+                        title="Keep pinpoint & radius active, minimize popup"
+                      >
+                        Minimize
+                      </button>
+                    </div>
+                  </div>
+                </Popup>
+              </LeafletMarker>
+            </>
+          )}
         </MapContainer>
       )}
-
-      {/* Floating Center Reticle */}
-      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-        <div className="w-12 h-12 border border-cyan-500/25 relative flex items-center justify-center">
-          <span className="w-2 h-0.5 bg-cyan-400/60 absolute" />
-          <span className="h-2 w-0.5 bg-cyan-400/60 absolute" />
-        </div>
-      </div>
 
       {/* Radar Sweep Animation */}
       {layers.radarSweep && (
@@ -879,52 +1545,62 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
         </div>
       )}
 
-      {/* Bottom Left: Calibrated Hazard Legend */}
+      {/* Centered on top of Center Bottom Dock: Calibrated Hazard Legend */}
       {isLegendCollapsed ? (
         <button
           onClick={() => setIsLegendCollapsed(false)}
-          className={`absolute bottom-4 left-4 z-20 px-2.5 py-1 border shadow-lg font-headline font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 transition-all ${
+          className={`absolute ${bottomOffset === 'bottom-20' ? 'bottom-36 md:bottom-40' : 'bottom-16 sm:bottom-[4.5rem]'} left-1/2 -translate-x-1/2 z-30 px-3 py-1 border shadow-2xl font-headline font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 transition-all backdrop-blur-md rounded-sm ${
             isDark
-              ? 'bg-[#0f131b]/95 border-[#27303e] text-slate-400 hover:text-white hover:border-slate-400'
+              ? 'bg-[#0f131b]/95 border-[#27303e] text-slate-300 hover:text-cyan-400 hover:border-cyan-500'
               : 'bg-white/95 border-[#cbd5e1] text-slate-700 hover:text-black hover:border-slate-400'
           }`}
-          title="Expand Hazard Legend Window"
+          title="Expand Calibrated Hazard Legend"
         >
+          <Layers className="w-3 h-3 text-cyan-400" />
           <span>Hazard Legend</span>
           <ChevronUp className="w-3 h-3 text-cyan-400" />
         </button>
       ) : (
-        <div className={`absolute bottom-4 left-4 z-20 px-3 py-2 border shadow-lg transition-all ${
+        <div className={`absolute ${bottomOffset === 'bottom-20' ? 'bottom-36 md:bottom-40' : 'bottom-16 sm:bottom-[4.5rem]'} left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 border shadow-2xl backdrop-blur-md transition-all flex flex-col items-center rounded-sm max-w-[95vw] ${
           isDark ? 'bg-[#0f131b]/95 border-[#27303e] text-slate-300' : 'bg-white/95 border-[#cbd5e1] text-slate-800'
         }`}>
-          <div className="flex items-center justify-between font-headline font-bold text-[10px] uppercase tracking-wider text-slate-400 mb-1">
-            <span>Calibrated Hazard Tiers</span>
+          <div className="w-full flex items-center justify-between font-headline font-bold text-[9px] uppercase tracking-wider text-slate-400 mb-1 border-b border-slate-700/40 pb-0.5 gap-4">
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block" />
+              <span>Calibrated Hazard Tiers</span>
+            </div>
             <button
               onClick={() => setIsLegendCollapsed(true)}
-              className="p-0.5 hover:text-cyan-400 text-slate-400 ml-3 transition-colors"
+              className="p-0.5 hover:text-cyan-400 text-slate-400 transition-colors"
               title="Collapse Hazard Legend"
               aria-label="Collapse Hazard Legend"
             >
               <ChevronDown className="w-3 h-3" />
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-1 font-telemetry text-[10px]">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-[#FFEBEE] border border-[#B71C1C]" />
-              <span className="text-[#D32F2F] font-bold">Zone 1: Hard Most</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-telemetry text-[10px]">
+            <div className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-[#D32F2F] fill-[#FFCDD2] shrink-0" />
+              <span className="text-[#D32F2F] font-bold whitespace-nowrap">Zone 1: Hard Most</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-[#FFF3E0] border border-[#E65100]" />
-              <span className="text-[#ED6C02] font-bold">Zone 2: Most</span>
+            <div className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-[#ED6C02] fill-[#FFE0B2] shrink-0" />
+              <span className="text-[#ED6C02] font-bold whitespace-nowrap">Zone 2: Most</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-[#FFF8E1] border border-[#FF8F00]" />
-              <span className="text-[#F57C00]">Zone 3: Some</span>
+            <div className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-[#FF8F00] fill-[#FFF9C4] shrink-0" />
+              <span className="text-[#F57C00] whitespace-nowrap">Zone 3: Some</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-[#E1F5FE] border border-[#01579B]" />
-              <span className="text-[#0288D1]">Zone 4: Negligible</span>
+            <div className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-[#0288D1] fill-[#B3E5FC] shrink-0" />
+              <span className="text-[#0288D1] whitespace-nowrap">Zone 4: Negligible</span>
             </div>
+            {activePrediction && activePrediction.isCritical !== false && (
+              <div className="flex items-center gap-1 pl-2 border-l border-purple-800/60">
+                <MapPin className="w-3 h-3 text-[#7B1FA2] fill-[#E1BEE7] shrink-0" />
+                <span className="text-purple-400 font-bold whitespace-nowrap">AI Runout ({activePrediction.radius || '7.5 km'})</span>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1039,7 +1715,7 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
             ? 'bg-[#0f131b]/95 border-[#27303e]'
             : 'bg-white/95 border-[#cbd5e1]'
         }`}>
-          {/* Main Locate Me Button */}
+          {/* Main Locate Me Button (Icon Only) */}
           <button
             onClick={async () => {
               try {
@@ -1055,33 +1731,35 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
               }
             }}
             disabled={gpsStatus === 'acquiring'}
-            className={`flex items-center gap-2 px-3 py-1.5 border font-headline text-xs font-bold uppercase tracking-wider shadow-lg transition-all ${
+            className={`w-8 h-8 flex items-center justify-center border transition-all shadow-lg cursor-pointer ${
               gpsStatus === 'acquiring'
                 ? 'bg-cyan-900/80 border-cyan-500 text-cyan-300 animate-pulse cursor-wait'
                 : gpsLocation && !gpsLocation.isSimulated
                   ? 'bg-[#00E5FF] hover:bg-[#00B0FF] text-black border-[#00B0FF] shadow-[0_0_15px_rgba(0,229,255,0.4)]'
                   : 'bg-[#0288D1] hover:bg-[#0277BD] text-white border-[#01579B]'
             }`}
-          >
-            <Locate className={`w-4 h-4 ${gpsStatus === 'acquiring' ? 'animate-spin' : gpsLocation ? 'text-black' : ''}`} />
-            <span>
-              {gpsStatus === 'acquiring'
+            title={
+              gpsStatus === 'acquiring'
                 ? 'Acquiring GPS...'
                 : gpsLocation
-                  ? `GPS: ${gpsLocation.lat.toFixed(3)}°, ${gpsLocation.lng.toFixed(3)}°`
-                  : 'Acquire My GPS'}
-            </span>
+                  ? `GPS: ${gpsLocation.lat.toFixed(4)}°, ${gpsLocation.lng.toFixed(4)}° (Click to center)`
+                  : 'Acquire My GPS'
+            }
+            aria-label="Acquire My GPS"
+          >
+            <Locate className={`w-4 h-4 ${gpsStatus === 'acquiring' ? 'animate-spin' : gpsLocation && !gpsLocation.isSimulated ? 'text-black' : ''}`} />
           </button>
 
           {/* Quick Presets Dropdown */}
           <div className="relative group">
             <button
-              className={`p-1.5 border font-headline text-xs font-bold uppercase transition-colors ${
+              className={`w-8 h-8 flex items-center justify-center border transition-colors cursor-pointer ${
                 isDark
                   ? 'bg-[#181c23] border-[#27303e] text-slate-300 hover:border-cyan-500'
                   : 'bg-slate-100 border-[#cbd5e1] text-slate-700 hover:border-cyan-500'
               }`}
               title="Quick Field GPS Simulation Presets"
+              aria-label="Quick Field GPS Simulation Presets"
             >
               <Navigation className="w-4 h-4 text-cyan-400" />
             </button>
@@ -1141,7 +1819,7 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
             <>
               <button
                 onClick={() => setIsTelemetryExpanded(prev => !prev)}
-                className={`px-2 py-1.5 border text-[10px] font-headline font-bold uppercase transition-colors ${
+                className={`h-8 px-2 flex items-center justify-center border text-[10px] font-headline font-bold uppercase transition-colors cursor-pointer ${
                   isTelemetryExpanded
                     ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500'
                     : isDark ? 'bg-[#181c23] text-slate-300 border-[#27303e]' : 'bg-slate-100 text-slate-700 border-[#cbd5e1]'
@@ -1152,10 +1830,11 @@ export function GisMapCanvas({ selectedSectorCoords, bottomOffset }) {
               </button>
               <button
                 onClick={clearGps}
-                className="p-1.5 border border-red-500/50 bg-red-950/40 text-red-400 hover:bg-red-900/60 hover:text-white transition-colors"
+                className="w-8 h-8 flex items-center justify-center border border-red-500/50 bg-red-950/40 text-red-400 hover:bg-red-900/60 hover:text-white transition-colors cursor-pointer"
                 title="Clear GPS Position"
+                aria-label="Clear GPS Position"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </>
           )}

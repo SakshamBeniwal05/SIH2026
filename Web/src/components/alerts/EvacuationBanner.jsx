@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Compass, X, RefreshCw, Eye } from 'lucide-react';
 import { useSocket } from '../../context/SocketContext';
 
-export function EvacuationBanner() {
-  const { activeHazard, alerts } = useSocket();
+export function EvacuationBanner({ onSelectAlert }) {
+  const { activeHazard, alerts, isOfficialActive, officialAlert } = useSocket();
 
   const [dismissedDirective, setDismissedDirective] = useState(false);
   const [dismissedDetour, setDismissedDetour] = useState(false);
@@ -17,8 +17,9 @@ export function EvacuationBanner() {
 
   if (!activeHazard) return null;
 
-  const hasEvacuation = activeHazard.tiers?.some(t => t.evacuationMandated);
-  const severedRoads = activeHazard.severedRoads || [];
+  const currentOfficial = isOfficialActive ? (officialAlert || activeHazard.current || activeHazard.officialAlert) : null;
+  const hasEvacuation = isOfficialActive && !!currentOfficial?.tiers?.some(t => t.evacuationMandated);
+  const severedRoads = isOfficialActive ? (activeHazard.severedRoads || []) : [];
 
   const showDirective = hasEvacuation && !dismissedDirective;
   const showDetour = severedRoads.length > 0 && !dismissedDetour;
@@ -53,7 +54,26 @@ export function EvacuationBanner() {
       {/* 1. Critical Evacuation Directive Banner */}
       {showDirective && (
         <div className="w-full bg-[#B71C1C] border border-[#7F0000] border-l-4 border-l-[#EF5350] px-3 py-1.5 flex items-center justify-between shadow-[0_2px_12px_rgba(183,28,28,0.4)]">
-          <div className="flex items-center gap-2 text-white flex-1 pr-2">
+          <div
+            className="flex items-center gap-2 text-white flex-1 pr-2 cursor-pointer hover:opacity-90"
+            onClick={() => {
+              if (onSelectAlert) {
+                const hazardLat = currentOfficial?.coordinates?.lat || activeHazard.location?.coordinates?.[1] || 30.4100;
+                const hazardLng = currentOfficial?.coordinates?.lng || activeHazard.location?.coordinates?.[0] || 79.4200;
+                onSelectAlert({
+                  id: 'active-hazard-epicenter',
+                  type: 'epicenter',
+                  layer: 'zones',
+                  coords: [hazardLat, hazardLng],
+                  zoom: 11,
+                  title: 'OFFICIAL GOVERNMENT EMERGENCY ORDER',
+                  basin: activeHazard.simulatedBasin || 'Alaknanda Valley (Chamoli)',
+                  rain: activeHazard.rainfallRateMmPerHour || 165
+                });
+              }
+            }}
+            title="Click to redirect map to Disaster Epicenter & enable Govt Alert layer"
+          >
             <span className="p-0.5 bg-[#7F0000] text-[#EF5350] shrink-0">
               <AlertTriangle className="w-4 h-4 animate-pulse" />
             </span>
@@ -86,7 +106,25 @@ export function EvacuationBanner() {
       {/* 2. Action Detour & Route Severance Banner */}
       {showDetour && (
         <div className="w-full bg-[#E65100] border border-[#A73A00] border-l-4 border-l-[#FFA726] px-3 py-1 flex items-center justify-between shadow-[0_2px_10px_rgba(230,81,0,0.3)]">
-          <div className="flex items-center gap-2 text-white flex-1 pr-2">
+          <div
+            className="flex items-center gap-2 text-white flex-1 pr-2 cursor-pointer hover:opacity-90"
+            onClick={() => {
+              if (onSelectAlert) {
+                onSelectAlert({
+                  id: 'severed-roads-alert',
+                  type: 'road',
+                  layer: 'roads',
+                  coords: [30.5280, 79.5080],
+                  zoom: 13,
+                  data: {
+                    name: severedRoads.join(' & ') || 'NH-58 Lifeline',
+                    severed: true
+                  }
+                });
+              }
+            }}
+            title="Click to view severed road corridors on map & enable Roads layer"
+          >
             <span className="p-0.5 bg-[#A73A00] text-[#FFA726] shrink-0">
               <Compass className="w-3.5 h-3.5" />
             </span>

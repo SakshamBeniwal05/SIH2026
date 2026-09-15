@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/common/Header';
 import { EvacuationBanner } from '../components/alerts/EvacuationBanner';
 import { useTheme } from '../context/ThemeContext';
@@ -13,11 +14,13 @@ import {
   Clock,
   MapPin,
   Flame,
-  Radio
+  Radio,
+  Crosshair
 } from 'lucide-react';
 
 export function AlertsFeed() {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
   const { activeHazard, reports, alerts } = useSocket();
 
   const [selectedFilter, setSelectedFilter] = useState('ALL'); // ALL, ZONE1, ZONE2, ZONE3, ZONE4
@@ -32,16 +35,19 @@ export function AlertsFeed() {
 
   // Combined alert stream from broadcast simulation and citizen reports
   const allEvents = [
-    ...(alerts || []).map(a => ({
-      id: a.simulationId || `sim-${Math.random()}`,
-      title: `BROADCAST ALERT: ${a.basinName || 'Regional Storm Event'}`,
-      description: `Precipitation rate of ${a.rainfallRateMmPerHour} mm/hr triggered concentric hazard zones. Evacuation mandated for Zone 1 Ground Zero. Affected lifelines: ${(a.severedRoads || []).join(', ')}.`,
-      tier: 'Hard Most',
-      zoneNum: 'ZONE1',
-      severity: 'CRITICAL',
-      timestamp: a.timestamp || new Date().toISOString(),
-      source: 'Admin Radar Simulation'
-    })),
+    ...(alerts || [])
+      .filter(a => !a.expiresAt || new Date(a.expiresAt).getTime() > Date.now())
+      .map(a => ({
+        id: a.simulationId || `sim-${Math.random()}`,
+        title: `${a.alertType === 'official' ? 'GOVERNMENT DIRECTIVE' : 'BROADCAST ALERT'}: ${a.basinName || 'Regional Storm Event'}`,
+        description: `Precipitation rate of ${a.rainfallRateMmPerHour} mm/hr triggered concentric hazard zones. Evacuation mandated for Zone 1 Ground Zero. Affected lifelines: ${(a.severedRoads || []).join(', ')}.`,
+        tier: 'Hard Most',
+        zoneNum: 'ZONE1',
+        severity: 'CRITICAL',
+        timestamp: a.timestamp || new Date().toISOString(),
+        source: a.issuingAuthority || 'Admin Radar Simulation',
+        coords: a.epicenter ? [a.epicenter.lat, a.epicenter.lng] : [30.41, 79.42]
+      })),
     ...reports.map(r => ({
       id: r._id,
       title: `FIELD INCIDENT: ${r.category.replace('_', ' ').toUpperCase()}`,
@@ -51,7 +57,8 @@ export function AlertsFeed() {
       severity: r.severityObserved?.toUpperCase() || 'SEVERE',
       timestamp: r.createdAt,
       mediaUrl: r.mediaUrl,
-      source: 'Crowdsourced Field Observer'
+      source: 'Crowdsourced Field Observer',
+      coords: r.location?.coordinates ? [r.location.coordinates[1], r.location.coordinates[0]] : [30.41, 79.42]
     }))
   ];
 
@@ -168,9 +175,24 @@ export function AlertsFeed() {
                       {event.description}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-3 pt-2 font-telemetry text-xs text-slate-400">
-                      <span>Source: <strong className="text-slate-300">{event.source}</strong></span>
-                      <span>Status: <strong className="text-emerald-400">BROADCASTED</strong></span>
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 font-telemetry text-xs text-slate-400 border-t border-slate-700/40 mt-2">
+                      <div className="flex items-center gap-3">
+                        <span>Source: <strong className="text-slate-300">{event.source}</strong></span>
+                        <span>Status: <strong className="text-emerald-400">BROADCASTED</strong></span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (event.coords) {
+                            navigate(`/?lat=${event.coords[0]}&lng=${event.coords[1]}&alertId=${event.id}`);
+                          } else {
+                            navigate('/');
+                          }
+                        }}
+                        className="px-2.5 py-1 bg-cyan-950 text-cyan-300 border border-cyan-500 hover:bg-cyan-900 flex items-center gap-1 font-bold text-[11px] transition-colors"
+                      >
+                        <Crosshair className="w-3.5 h-3.5" />
+                        <span>VIEW ON COMMAND CENTER MAP</span>
+                      </button>
                     </div>
                   </div>
                 </div>

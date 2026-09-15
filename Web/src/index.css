@@ -98,3 +98,12 @@
 .light .leaflet-popup-tip {
   background: #ffffff !important;
 }
+
+/* Google Maps InfoWindow Cleanup: Ensure empty/orphaned InfoWindow shells are never displayed */
+.gm-style-iw-c:has(.gm-style-iw-d:empty) {
+  display: none !important;
+}
+.gm-style-iw-d:empty {
+  display: none !important;
+}
+

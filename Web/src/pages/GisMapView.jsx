@@ -17,7 +17,52 @@ import {
 
 export function GisMapView() {
   const { isDark } = useTheme();
-  const { activeHazard, reports, telemetry } = useSocket();
+  const { activeHazard, reports, telemetry, predictedAlert, isOfficialActive } = useSocket();
+  const [focusedTarget, setFocusedTarget] = useState(null);
+
+  // Sync AI prediction focus: If conditions become safe (predictedAlert is null), clear focus.
+  // If a new 12-second prediction arrives, update focus to only the latest prediction!
+  useEffect(() => {
+    if (focusedTarget && (focusedTarget.type === 'prediction' || focusedTarget.id === 'ai-predicted-danger' || focusedTarget.id === 'ai-prediction-cycle')) {
+      if (!predictedAlert || predictedAlert.isCritical === false) {
+        setFocusedTarget(null);
+      } else if (predictedAlert.coordinates) {
+        setFocusedTarget({
+          id: 'ai-predicted-danger',
+          type: 'prediction',
+          layer: 'predictions',
+          coords: [predictedAlert.coordinates.lat, predictedAlert.coordinates.lng],
+          zoom: 12,
+          title: `AI PREDICTED: ${predictedAlert.location || predictedAlert.locationName || 'Runout Corridor'}`,
+          data: predictedAlert,
+          timestamp: Date.now()
+        });
+      }
+    }
+  }, [predictedAlert, focusedTarget]);
+
+  // Synchronously clear focused target if government directive stands down or expires
+  useEffect(() => {
+    if (!isOfficialActive && focusedTarget && (
+      focusedTarget.type === 'epicenter' ||
+      focusedTarget.id === 'active-hazard-epicenter' ||
+      focusedTarget.id === 'official-govt-directive-live'
+    )) {
+      setFocusedTarget(null);
+    }
+  }, [isOfficialActive, focusedTarget]);
+
+  const handleSelectAlert = (target) => {
+    if (!target) return;
+    if (focusedTarget && focusedTarget.id === target.id) {
+      setFocusedTarget(null);
+      return;
+    }
+    setFocusedTarget({
+      ...target,
+      timestamp: Date.now()
+    });
+  };
 
   // Bottom Sheet State: 'peek' (72px), 'mid' (42%), 'max' (88%)
   const [sheetState, setSheetState] = useState('peek');
@@ -35,14 +80,46 @@ export function GisMapView() {
         ? 'h-[42%]'
         : 'h-[88%]';
 
+  const [selectedCoords, setSelectedCoords] = useState(null);
+
+  const handleSelectSector = (sectorKey) => {
+    const coordsMap = {
+      chamoli: [30.4100, 79.4200],
+      kedarnath: [30.7300, 79.0600],
+      joshimath: [30.5500, 79.5600],
+      dehradun: [30.3165, 78.0322],
+      uttarkashi: [30.7300, 78.4400],
+      pithoragarh: [29.5800, 80.2200],
+      nainital: [29.3800, 79.4600],
+      almora: [29.6000, 79.6600],
+      tehri: [30.3800, 78.4800]
+    };
+    const coords = coordsMap[sectorKey];
+    if (coords) {
+      setSelectedCoords(coords);
+      setFocusedTarget({
+        id: `sector-${sectorKey}`,
+        type: 'sector',
+        coords,
+        zoom: 12,
+        timestamp: Date.now()
+      });
+    }
+  };
+
   return (
     <div className="w-screen h-screen overflow-hidden flex flex-col pt-12 relative select-none">
-      <Header />
-      <EvacuationBanner />
+      <Header onSelectSector={handleSelectSector} />
+      <EvacuationBanner onSelectAlert={handleSelectAlert} />
 
       {/* Full Bleed Map */}
       <div className="flex-1 w-full h-full relative">
-        <GisMapCanvas bottomOffset={sheetState === 'peek' ? 'bottom-20' : 'bottom-4'} />
+        <GisMapCanvas
+          selectedSectorCoords={selectedCoords}
+          focusedTarget={focusedTarget}
+          onClearFocus={() => setFocusedTarget(null)}
+          bottomOffset={sheetState === 'peek' ? 'bottom-20' : 'bottom-4'}
+        />
 
         {/* Floating Right Perimeter Action Rings */}
         <div className="absolute right-3 top-6 z-20 flex flex-col gap-2">
@@ -131,7 +208,19 @@ export function GisMapView() {
                 {reports.map((rep) => (
                   <div
                     key={rep._id}
-                    className={`p-3 border ${isDark ? 'bg-[#181c23] border-[#27303e]' : 'bg-white border-[#cbd5e1]'}`}
+                    onClick={() => {
+                      handleSelectAlert({
+                        id: rep._id,
+                        type: 'report',
+                        layer: 'reports',
+                        coords: [rep.location.coordinates[1], rep.location.coordinates[0]],
+                        zoom: 14,
+                        data: rep
+                      });
+                      setSheetState('peek');
+                    }}
+                    className={`p-3 border cursor-pointer hover:border-red-400 transition-all ${isDark ? 'bg-[#181c23] border-[#27303e] hover:bg-[#1f2633]' : 'bg-white border-[#cbd5e1] hover:shadow-md'}`}
+                    title="Click to redirect map to this incident"
                   >
                     <div className="flex justify-between items-center mb-1">
                       <span className="font-headline font-bold text-xs uppercase text-red-400">
@@ -142,9 +231,9 @@ export function GisMapView() {
                       </span>
                     </div>
                     <p className="font-body text-xs text-slate-300 line-clamp-2">{rep.description}</p>
-                    <div className="mt-2 text-[10px] font-telemetry text-slate-400 flex justify-between">
+                    <div className="mt-2 text-[10px] font-telemetry text-slate-400 flex justify-between items-center">
                       <span>Coordinates: [{rep.location.coordinates[1].toFixed(3)}, {rep.location.coordinates[0].toFixed(3)}]</span>
-                      <span className="text-emerald-400">Verified</span>
+                      <span className="text-cyan-400 font-bold hover:underline">LOCATE ON MAP</span>
                     </div>
                   </div>
                 ))}
