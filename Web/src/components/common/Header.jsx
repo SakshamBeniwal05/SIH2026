@@ -124,17 +124,19 @@ export function Header({ onSelectSector }) {
             )}
           </div>
 
-          {/* Quick Uttarakhand Sector Jumps directly inside Navbar */}
+          {/* Quick Northeast 7 Sister States Sector Jumps directly inside Navbar */}
           <div className="hidden md:flex items-center gap-1 shrink-0">
             <span className="text-[9px] font-headline uppercase font-bold text-slate-500 mr-0.5">
-              Jumps:
+              7 Sisters:
             </span>
             {[
-              { id: 'chamoli', name: 'Chamoli' },
-              { id: 'kedarnath', name: 'Kedarnath' },
-              { id: 'joshimath', name: 'Joshimath' },
-              { id: 'dehradun', name: 'Dehradun' },
-              { id: 'uttarkashi', name: 'Uttarkashi' }
+              { id: 'guwahati', name: 'Assam' },
+              { id: 'shillong', name: 'Meghalaya' },
+              { id: 'aizawl', name: 'Mizoram' },
+              { id: 'kohima', name: 'Nagaland' },
+              { id: 'imphal', name: 'Manipur' },
+              { id: 'itanagar', name: 'Arunachal' },
+              { id: 'agartala', name: 'Tripura' }
             ].map((sec) => (
               <button
                 key={sec.id}
@@ -160,13 +162,14 @@ export function Header({ onSelectSector }) {
               isDark ? 'bg-[#0b0f17]/98 border-[#27303e] text-slate-200' : 'bg-white/98 border-[#cbd5e1] text-slate-800'
             }`}>
               {[
-                { id: 'chamoli', name: 'Chamoli / Joshimath Corridor', subtitle: 'Alaknanda Valley', tag: 'NH-58 Lifeline' },
-                { id: 'kedarnath', name: 'Kedarnath / Rudraprayag Corridor', subtitle: 'Mandakini Basin', tag: 'NH-107 Highway' },
-                { id: 'joshimath', name: 'Joshimath Sunil Ridge', subtitle: 'Upper Alaknanda Escarpment', tag: 'Active Creep' },
-                { id: 'dehradun', name: 'Dehradun / Maldevta Basin', subtitle: 'Song River Floodplain', tag: 'Doppler Radar' },
-                { id: 'uttarkashi', name: 'Uttarkashi / Silkyara Corridor', subtitle: 'Bhagirathi Valley', tag: 'NH-134 Bypass' },
-                { id: 'pithoragarh', name: 'Pithoragarh / Dharchula', subtitle: 'Kali Valley Corridor', tag: 'High Hazard' },
-                { id: 'nainital', name: 'Nainital / Bhowali Sector', subtitle: 'Kosi River Watershed', tag: 'Catchment' }
+                { id: 'guwahati', name: 'Guwahati / Kamrup Corridor', subtitle: 'Brahmaputra Valley (Assam)', tag: 'NH-27 Lifeline' },
+                { id: 'shillong', name: 'Shillong / Cherrapunji Gorges', subtitle: 'Khasi & Jaintia Hills (Meghalaya)', tag: 'NH-6 Highway' },
+                { id: 'aizawl', name: 'Aizawl / Melthum Ridge', subtitle: 'Tlawng River Basin (Mizoram)', tag: 'NH-306 Lifeline' },
+                { id: 'kohima', name: 'Kohima / Chumukedima Pagla Pahar', subtitle: 'Doyang Basin (Nagaland)', tag: 'NH-29 Lifeline' },
+                { id: 'imphal', name: 'Tupul / Noney Railway Sector', subtitle: 'Ijai River Canyon (Manipur)', tag: 'NH-37 Corridor' },
+                { id: 'itanagar', name: 'Pasighat / Upper Siang Gorge', subtitle: 'Siang Basin (Arunachal Pradesh)', tag: 'NH-13 Bypass' },
+                { id: 'agartala', name: 'Agartala / Howrah River Basin', subtitle: 'West Tripura / Gomati (Tripura)', tag: 'NH-8 Highway' },
+                { id: 'haflong', name: 'Haflong / Jatinga Escarpment', subtitle: 'Dima Hasao Hill Section (Assam)', tag: 'NH-27 Chokepoint' }
               ]
                 .filter(t =>
                   t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

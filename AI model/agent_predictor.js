@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { UTTARAKHAND_BOUNDS, UTTARAKHAND_DISTRICTS, loadUttarakhandDisasterDataset } from './dataset_loader.js';
+import { NORTHEAST_BOUNDS, NORTHEAST_DISTRICTS, loadNortheastDisasterDataset } from './dataset_loader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,33 +38,36 @@ export function calculateDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 /**
- * Validates that a given coordinate is strictly within Uttarakhand
+ * Validates that a given coordinate is strictly within Northeast India (7 Sister States)
  */
-export function isInsideUttarakhand(lat, lng) {
+export function isInsideNortheast(lat, lng) {
   return (
-    lat >= UTTARAKHAND_BOUNDS.minLat &&
-    lat <= UTTARAKHAND_BOUNDS.maxLat &&
-    lng >= UTTARAKHAND_BOUNDS.minLng &&
-    lng <= UTTARAKHAND_BOUNDS.maxLng
+    lat >= NORTHEAST_BOUNDS.minLat &&
+    lat <= NORTHEAST_BOUNDS.maxLat &&
+    lng >= NORTHEAST_BOUNDS.minLng &&
+    lng <= NORTHEAST_BOUNDS.maxLng
   );
 }
 
+// Backward compatibility alias
+export const isInsideUttarakhand = isInsideNortheast;
+
 /**
  * Cross-checks current coordinates and live meteorological conditions
- * against Uttarakhand's documented 2010–2026 historical disaster catalog.
+ * against Northeast India's documented 2010–2026 historical disaster catalog.
  *
  * Evaluates whether conditions cross the critical 50% threshold for slope failure.
  */
 export function crossCheckHistoricalDisaster({
-  coordinates = { lat: 30.4100, lng: 79.4200 },
+  coordinates = { lat: 26.1445, lng: 91.7362 },
   precipitationMmPerHour = 0,
   soilMoisturePct = 70,
   windSpeedKmh = 15,
-  stationName = 'Uttarakhand Corridor'
+  stationName = 'Northeast 7 Sisters Corridor'
 } = {}) {
-  const events = loadUttarakhandDisasterDataset();
-  const validLat = Math.min(Math.max(coordinates.lat, UTTARAKHAND_BOUNDS.minLat), UTTARAKHAND_BOUNDS.maxLat);
-  const validLng = Math.min(Math.max(coordinates.lng, UTTARAKHAND_BOUNDS.minLng), UTTARAKHAND_BOUNDS.maxLng);
+  const events = loadNortheastDisasterDataset();
+  const validLat = Math.min(Math.max(coordinates.lat, NORTHEAST_BOUNDS.minLat), NORTHEAST_BOUNDS.maxLat);
+  const validLng = Math.min(Math.max(coordinates.lng, NORTHEAST_BOUNDS.minLng), NORTHEAST_BOUNDS.maxLng);
 
   // 1. Proximity to historical failure corridors
   let nearestEvent = events[0];
@@ -77,8 +80,8 @@ export function crossCheckHistoricalDisaster({
     }
   });
 
-  // 2. Rainfall Scoring against Uttarakhand empirical thresholds (0 - 45 pts)
-  // Historical minimum threshold for debris flow initiation in Garhwal/Kumaon is ~65 mm/h
+  // 2. Rainfall Scoring against Northeast empirical thresholds (0 - 45 pts)
+  // Northeast India encounters intense orographic and cyclonic monsoon bursts (65+ mm/h threshold)
   const rain = Math.max(0, Number(precipitationMmPerHour) || 0);
   let rainScore = 0;
   if (rain < 20) {
@@ -92,7 +95,7 @@ export function crossCheckHistoricalDisaster({
   }
 
   // 3. Soil Saturation Scoring (0 - 35 pts)
-  // Critical pore pressure failure in weathered talus occurs at >= 88%
+  // Critical pore pressure failure in weathered hill slopes occurs at >= 88%
   const soil = Math.max(0, Math.min(100, Number(soilMoisturePct) || 70));
   let soilScore = 0;
   if (soil < 65) {
@@ -109,11 +112,11 @@ export function crossCheckHistoricalDisaster({
 
   // 5. Geological Shear Proximity Weight (0 - 10 pts)
   let histScore = 3;
-  if (minDistanceKm <= 20) {
+  if (minDistanceKm <= 25) {
     histScore = 10;
-  } else if (minDistanceKm <= 40) {
+  } else if (minDistanceKm <= 50) {
     histScore = 7;
-  } else if (minDistanceKm <= 60) {
+  } else if (minDistanceKm <= 80) {
     histScore = 5;
   }
 
@@ -132,6 +135,7 @@ export function crossCheckHistoricalDisaster({
     nearestEvent: {
       name: nearestEvent.name,
       year: nearestEvent.year,
+      state: nearestEvent.state,
       district: nearestEvent.district,
       disasterType: nearestEvent.disasterType,
       historicalRainfall: nearestEvent.rainfallMmPerHour,
@@ -148,14 +152,14 @@ export function crossCheckHistoricalDisaster({
  * User Schema: { alertType, location, radius, issued }
  */
 export function generateOfficialGovtAlert({
-  locationName = 'Alaknanda Valley (Chamoli / Joshimath)',
-  coordinates = { lat: 30.4100, lng: 79.4200 },
+  locationName = 'Brahmaputra Valley (Guwahati Corridor)',
+  coordinates = { lat: 26.1445, lng: 91.7362 },
   rainfallRateMmPerHour = 165,
-  issuingAuthority = 'State Disaster Management Authority (USDMA)'
+  issuingAuthority = 'Assam State Disaster Management Authority (ASDMA)'
 } = {}) {
-  // Clamp strictly within Uttarakhand
-  const validLat = Math.min(Math.max(coordinates.lat, UTTARAKHAND_BOUNDS.minLat), UTTARAKHAND_BOUNDS.maxLat);
-  const validLng = Math.min(Math.max(coordinates.lng, UTTARAKHAND_BOUNDS.minLng), UTTARAKHAND_BOUNDS.maxLng);
+  // Clamp strictly within Northeast India
+  const validLat = Math.min(Math.max(coordinates.lat, NORTHEAST_BOUNDS.minLat), NORTHEAST_BOUNDS.maxLat);
+  const validLng = Math.min(Math.max(coordinates.lng, NORTHEAST_BOUNDS.minLng), NORTHEAST_BOUNDS.maxLng);
 
   const rain = Math.max(10, Number(rainfallRateMmPerHour) || 120);
   const z1Meters = Math.round(rain * 28 + 600);
@@ -214,7 +218,7 @@ export function generateOfficialGovtAlert({
         fillOpacity: 0.25,
         borderStyle: 'solid',
         evacuationMandated: false,
-        description: 'Moderate Disruption — Slope creep, agricultural diversion.'
+        description: 'Moderate Disruption — Slope creep, riparian diversion.'
       },
       {
         tierName: 'Negligible',
@@ -237,8 +241,8 @@ export function generateOfficialGovtAlert({
  * User Schema: { alertType, location, radius, issued }
  */
 export function generateAiClimaticPrediction({
-  locationName = 'Upper Mandakini & Sonprayag Slope (Kedarnath Corridor)',
-  coordinates = { lat: 30.7350, lng: 79.0669 },
+  locationName = 'Ijai River Gorge & Tupul Escarpment (Noney Corridor)',
+  coordinates = { lat: 24.8167, lng: 93.6833 },
   currentRainfallRate = 175,
   soilPoreSaturation = 92.4,
   windSpeedKmh = 25,
@@ -246,9 +250,9 @@ export function generateAiClimaticPrediction({
 } = {}) {
   const model = getModel();
 
-  // Clamp strictly within Uttarakhand
-  const validLat = Math.min(Math.max(coordinates.lat, UTTARAKHAND_BOUNDS.minLat), UTTARAKHAND_BOUNDS.maxLat);
-  const validLng = Math.min(Math.max(coordinates.lng, UTTARAKHAND_BOUNDS.minLng), UTTARAKHAND_BOUNDS.maxLng);
+  // Clamp strictly within Northeast India (7 Sister States)
+  const validLat = Math.min(Math.max(coordinates.lat, NORTHEAST_BOUNDS.minLat), NORTHEAST_BOUNDS.maxLat);
+  const validLng = Math.min(Math.max(coordinates.lng, NORTHEAST_BOUNDS.minLng), NORTHEAST_BOUNDS.maxLng);
 
   // Cross-check against historical disaster database
   const verification = crossCheckHistoricalDisaster({
@@ -268,7 +272,7 @@ export function generateAiClimaticPrediction({
 
   const radiusKm = (predZ1Meters / 1000).toFixed(1);
 
-  // Classify hazard based on rainfall + saturation thresholds learned from Data/
+  // Classify hazard based on rainfall + saturation thresholds learned from Northeast data
   let hazardLabel = 'CONVECTIVE_SLOPE_SATURATION';
   if (currentRainfallRate >= 150 && soilPoreSaturation >= 90) {
     hazardLabel = 'CRITICAL_CLOUDBURST_TALUS_SURGE';
@@ -287,7 +291,7 @@ export function generateAiClimaticPrediction({
     location: locationName,
     radius: `${radiusKm} km (T+${leadTimeHours}h Projected Surge Expansion)`,
     radiusMeters: predZ1Meters,
-    issued: 'AI Climatic Prediction Engine (Trained on Uttarakhand 2010–2026 Dataset)',
+    issued: 'AI Climatic Prediction Engine (Trained on Northeast India 7 Sisters 2010–2026 Dataset)',
     coordinates: { lat: validLat, lng: validLng },
     hazardLevel: hazardLabel,
     confidence,
@@ -342,7 +346,7 @@ export function generateAiClimaticPrediction({
         borderStyle: 'dashed',
         dashArray: '6, 4',
         evacuationMandated: false,
-        description: 'Vulnerability buffer: agricultural paddies and local road subsidence.'
+        description: 'Vulnerability buffer: agricultural terraces and riverbank subsidence.'
       },
       {
         tierName: 'Pred-Zone 4: Regional Forecast Horizon',

@@ -34,87 +34,87 @@ import {
   Clock
 } from 'lucide-react';
 
-// Uttarakhand Sector Stations Database
+// Northeast India (7 Sister States) Sector Stations Database
 const SECTOR_STATIONS = [
   {
-    id: 'chamoli',
-    name: 'Alaknanda Valley (Chamoli / Joshimath)',
-    lat: 30.4100,
-    lng: 79.4200,
+    id: 'guwahati',
+    name: 'Brahmaputra Valley (Guwahati / Kamrup, Assam)',
+    lat: 26.1445,
+    lng: 91.7362,
     defaultRain: 165,
-    defaultWind: 32,
-    defaultPore: 93.8,
-    severedRoads: ['NH-58 (Rishikesh-Joshimath-Badrinath Lifeline)', 'Helang-Joshimath Bypass Link Road']
-  },
-  {
-    id: 'mandakini',
-    name: 'Mandakini Basin (Kedarnath / Rudraprayag)',
-    lat: 30.7300,
-    lng: 79.0600,
-    defaultRain: 180,
-    defaultWind: 45,
-    defaultPore: 94.5,
-    severedRoads: ['NH-107 (Rudraprayag-Guptkashi-Kedarnath Highway)', 'Kund-Gopeshwar Arterial Route']
-  },
-  {
-    id: 'bhagirathi',
-    name: 'Bhagirathi Valley (Uttarkashi / Silkyara)',
-    lat: 30.7300,
-    lng: 78.4400,
-    defaultRain: 140,
-    defaultWind: 26,
-    defaultPore: 89.2,
-    severedRoads: ['NH-134 (Silkyara Bend-Barkot Highway)', 'NH-34 (Dharasu-Uttarkashi-Gangotri Corridor)']
-  },
-  {
-    id: 'song',
-    name: 'Song River Basin (Maldevta / Dehradun)',
-    lat: 30.3165,
-    lng: 78.0322,
-    defaultRain: 110,
-    defaultWind: 22,
-    defaultPore: 85.0,
-    severedRoads: ['Maldevta-Kumalda-Sahastradhara Road', 'Raipur-Thano Forest Link']
-  },
-  {
-    id: 'pithoragarh',
-    name: 'Pithoragarh & Kali Valley (Malpa / Dharchula)',
-    lat: 29.9800,
-    lng: 80.7500,
-    defaultRain: 170,
-    defaultWind: 38,
-    defaultPore: 91.0,
-    severedRoads: ['NH-9 (Tanakpur-Pithoragarh-Dharchula Highway)', 'Tawaghat-Lipulekh Border Highway']
-  },
-  {
-    id: 'nainital',
-    name: 'Nainital Lake Basin & Balia Nala',
-    lat: 29.3919,
-    lng: 79.4542,
-    defaultRain: 135,
-    defaultWind: 25,
-    defaultPore: 87.5,
-    severedRoads: ['NH-109 (Kathgodam-Nainital Hill Road)', 'Balia Nala Ravine Link']
-  },
-  {
-    id: 'almora',
-    name: 'Almora & Kosi Basin',
-    lat: 29.5971,
-    lng: 79.6591,
-    defaultRain: 115,
-    defaultWind: 20,
-    defaultPore: 86.0,
-    severedRoads: ['NH-109 (Almora-Ranikhet Highway)', 'Kosi-Hawalbagh Link Road']
-  },
-  {
-    id: 'tehri',
-    name: 'Tehri Reservoir Catchment (Chamba / New Tehri)',
-    lat: 30.3782,
-    lng: 78.4803,
-    defaultRain: 125,
     defaultWind: 30,
-    defaultPore: 88.0,
-    severedRoads: ['Chamba-New Tehri Ridge Road', 'Rishikesh-Chamba Bypass NH-94']
+    defaultPore: 89.5,
+    severedRoads: ['NH-27 (Guwahati Bypass Lifeline)', 'Guwahati-Shillong GS Road Corridor']
+  },
+  {
+    id: 'shillong',
+    name: 'Khasi & Jaintia Hills (Shillong / Cherrapunji, Meghalaya)',
+    lat: 25.5788,
+    lng: 91.8933,
+    defaultRain: 215,
+    defaultWind: 42,
+    defaultPore: 96.0,
+    severedRoads: ['NH-6 (Shillong-Jowai-Silchar Lifeline)', 'SH-5 (Sohra-Shella Gorges Artery)']
+  },
+  {
+    id: 'aizawl',
+    name: 'Aizawl Ridge & Chhimtuipui Basin (Mizoram)',
+    lat: 23.7271,
+    lng: 92.7176,
+    defaultRain: 175,
+    defaultWind: 34,
+    defaultPore: 94.2,
+    severedRoads: ['NH-306 (Silchar-Kolasib-Aizawl Lifeline)', 'Melthum-Bualpui Ridge Road']
+  },
+  {
+    id: 'imphal_noney',
+    name: 'Imphal Basin & Noney Corridor (Manipur)',
+    lat: 24.8167,
+    lng: 93.6833,
+    defaultRain: 185,
+    defaultWind: 36,
+    defaultPore: 93.8,
+    severedRoads: ['NH-37 (Imphal-Jiribam Highway)', 'Tupul Railway Approach Corridor']
+  },
+  {
+    id: 'kohima',
+    name: 'Kohima & Chumukedima Gorge (Nagaland)',
+    lat: 25.6751,
+    lng: 94.1086,
+    defaultRain: 145,
+    defaultWind: 28,
+    defaultPore: 90.5,
+    severedRoads: ['NH-29 (Dimapur-Kohima Pagla Pahar Corridor)', 'Kohima-Mao Manipur Gate Highway']
+  },
+  {
+    id: 'itanagar_siang',
+    name: 'Siang & Papum Pare Basin (Arunachal Pradesh)',
+    lat: 27.1004,
+    lng: 93.6166,
+    defaultRain: 160,
+    defaultWind: 32,
+    defaultPore: 88.5,
+    severedRoads: ['NH-13 (Trans-Arunachal Highway)', 'Pasighat-Pangin-Along Artery']
+  },
+  {
+    id: 'silchar_dima',
+    name: 'Dima Hasao & Barak Valley (Haflong / Silchar, Assam)',
+    lat: 25.1833,
+    lng: 93.0167,
+    defaultRain: 170,
+    defaultWind: 35,
+    defaultPore: 92.0,
+    severedRoads: ['NH-27 (Haflong-Jatinga Hill Section)', 'Silchar-Kalain Arterial Bypass']
+  },
+  {
+    id: 'agartala',
+    name: 'Howrah Basin & Dhalai (Tripura)',
+    lat: 23.8315,
+    lng: 91.2868,
+    defaultRain: 135,
+    defaultWind: 24,
+    defaultPore: 85.0,
+    severedRoads: ['NH-8 (Assam-Agartala National Highway)', 'Ambassa-Manu Chokepoint']
   }
 ];
 
@@ -131,11 +131,11 @@ export function AdminSimulation() {
   } = useSocket();
 
   // Official Government Alert Form State
-  const [authority, setAuthority] = useState('State Disaster Management Authority (USDMA) Uttarakhand');
-  const [selectedStationId, setSelectedStationId] = useState('chamoli');
+  const [authority, setAuthority] = useState('North Eastern Council (NEC) & ASDMA');
+  const [selectedStationId, setSelectedStationId] = useState('guwahati');
   const [basin, setBasin] = useState(SECTOR_STATIONS[0].name);
   const [rainfall, setRainfall] = useState(165);
-  const [epicenter, setEpicenter] = useState({ lat: 30.4100, lng: 79.4200 });
+  const [epicenter, setEpicenter] = useState({ lat: 26.1445, lng: 91.7362 });
   const [defconLevel, setDefconLevel] = useState('DEFCON 1 // IMMINENT SURGE');
   const [severedRoads, setSeveredRoads] = useState(SECTOR_STATIONS[0].severedRoads);
   const [isBroadcastingOfficial, setIsBroadcastingOfficial] = useState(false);
@@ -459,7 +459,7 @@ export function AdminSimulation() {
 
       setBroadcastLog({
         status: 'SUCCESS',
-        message: `Official Government Emergency Directive promulgated by ${authority}! Ground Zero and concentric evacuation cordons (${govtRadiusTiers.z1.km} km to ${govtRadiusTiers.z4.km} km) published across Uttarakhand (Active for ${Math.floor(govtTimeoutSeconds / 60)}m ${govtTimeoutSeconds % 60}s).`
+        message: `Official Government Emergency Directive promulgated by ${authority}! Ground Zero and concentric evacuation cordons (${govtRadiusTiers.z1.km} km to ${govtRadiusTiers.z4.km} km) published across Northeast India (7 Sister States) (Active for ${Math.floor(govtTimeoutSeconds / 60)}m ${govtTimeoutSeconds % 60}s).`
       });
     } catch (err) {
       setBroadcastLog({
@@ -602,7 +602,7 @@ export function AdminSimulation() {
               </h1>
             </div>
             <p className="font-body text-xs text-slate-400 mt-1">
-              AI cross-checks real-time latitude & longitude against Uttarakhand's 2010–2026 disaster dataset. Predictions are broadcast strictly when risk exceeds 50% or when custom weather is submitted by admin.
+              AI cross-checks real-time latitude & longitude against Northeast India's (7 Sister States) 2010–2026 disaster dataset. Predictions are broadcast strictly when risk exceeds 50% or when custom weather is submitted by admin.
             </p>
           </div>
 
@@ -767,10 +767,15 @@ export function AdminSimulation() {
                   isDark ? 'bg-[#0a0e15] border-[#27303e] text-slate-200' : 'bg-[#f8fafc] border-[#cbd5e1] text-slate-800'
                 }`}
               >
-                <option>State Disaster Management Authority (USDMA) Uttarakhand</option>
-                <option>National Disaster Management Authority (NDMA) & IMD Central</option>
-                <option>District Magistrate Chamoli & Garhwal Commissioner</option>
-                <option>State Emergency Operations Centre (SEOC) Dehradun</option>
+                <option>North Eastern Council (NEC) & ASDMA</option>
+                <option>Assam State Disaster Management Authority (ASDMA)</option>
+                <option>Meghalaya State Disaster Management Authority (MSDMA)</option>
+                <option>Disaster Management & Rehabilitation (DM&R) Mizoram</option>
+                <option>Nagaland State Disaster Management Authority (NSDMA)</option>
+                <option>Manipur State Disaster Management Authority (SDMA)</option>
+                <option>Arunachal Pradesh Disaster Management Authority (APDMA)</option>
+                <option>Tripura State Disaster Management Authority (TDMA)</option>
+                <option>National Disaster Management Authority (NDMA) & NEOC</option>
               </select>
             </div>
 
@@ -1465,7 +1470,7 @@ export function AdminSimulation() {
                   <span>Historical Data Cross-Check Protocol</span>
                 </div>
                 <p>
-                  Every 12 seconds, the AI verifies current atmospheric data against historical Uttarakhand records (2010–2026). If the calculated disaster risk is <strong>&le; 50%</strong>, no hazard prediction is broadcast. Threat zones are broadcast <strong>only</strong> when risk crosses <strong>50%</strong> or via admin custom input.
+                  Every 12 seconds, the AI verifies current atmospheric data against historical Northeast India records (2010–2026). If the calculated disaster risk is <strong>&le; 50%</strong>, no hazard prediction is broadcast. Threat zones are broadcast <strong>only</strong> when risk crosses <strong>50%</strong> or via admin custom input.
                 </p>
               </div>
             </div>

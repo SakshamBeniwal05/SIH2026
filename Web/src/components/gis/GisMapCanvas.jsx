@@ -4,14 +4,15 @@ import { MapContainer, TileLayer, Circle as LeafletCircle, Marker as LeafletMark
 import L from 'leaflet';
 import { useTheme } from '../../context/ThemeContext';
 import { useSocket } from '../../context/SocketContext';
-import { useGps, calculateDistanceKm, UTTARAKHAND_BOUNDS } from '../../context/GpsContext';
+import { useGps, calculateDistanceKm, NORTHEAST_BOUNDS } from '../../context/GpsContext';
 import { darkMapStyle, lightMapStyle } from './googleMapStyles';
 import {
   GOOGLE_MASK_PATHS,
   LEAFLET_MASK_POSITIONS,
-  UTTARAKHAND_PERIMETER_GOOGLE,
-  UTTARAKHAND_PERIMETER_LEAFLET
-} from '../../data/uttarakhandMask';
+  NORTHEAST_STATE_PERIMETERS,
+  NORTHEAST_PERIMETER_GOOGLE,
+  NORTHEAST_PERIMETER_LEAFLET
+} from '../../data/northeastMask';
 import {
   Layers,
   Crosshair,
@@ -191,15 +192,15 @@ export function GisMapCanvas({
   const [isLayersCollapsed, setIsLayersCollapsed] = useState(false);
   const [isLegendCollapsed, setIsLegendCollapsed] = useState(false);
 
-  // Uttarakhand Regional Center (Chamoli / Alaknanda Valley)
-  const [mapCenter, setMapCenter] = useState({ lat: 30.4100, lng: 79.4200 });
+  // Northeast India Regional Center (Guwahati / Brahmaputra Basin)
+  const [mapCenter, setMapCenter] = useState({ lat: 26.1445, lng: 91.7362 });
   const [activeInfoWindow, setActiveInfoWindow] = useState(null);
   const googleMapRef = useRef(null);
   const leafletTargetMarkerRef = useRef(null);
 
   const leafletMaxBounds = [
-    [27.5, 76.5],
-    [32.5, 82.5]
+    [20.5, 88.5],
+    [30.5, 98.0]
   ];
 
   // Pan to GPS location when acquired or updated
@@ -284,65 +285,93 @@ export function GisMapCanvas({
     googleMapRef.current = null;
   }, []);
 
-  // Uttarakhand Critical Highway Lifelines & Corridors
+  // Northeast India Critical Highway Lifelines & Corridors
   const roadCorridors = [
     {
-      id: 'nh-58',
-      name: 'NH-58 (Rishikesh - Chamoli - Joshimath - Badrinath Lifeline)',
-      severed: activeHazard?.severedRoads?.some(r => r.includes('NH-58')),
+      id: 'nh-27',
+      name: 'NH-27 / NH-37 (Brahmaputra Valley Arterial Lifeline: Guwahati - Nagaon - Kaziranga - Jorhat - Dibrugarh)',
+      severed: activeHazard?.severedRoads?.some(r => r.includes('NH-27') || r.includes('NH-37')),
       path: [
-        { lat: 30.1500, lng: 78.3000 },
-        { lat: 30.2200, lng: 78.7800 },
-        { lat: 30.2800, lng: 78.9800 },
-        { lat: 30.3200, lng: 79.2200 },
-        { lat: 30.4100, lng: 79.4200 },
-        { lat: 30.4600, lng: 79.4800 },
-        { lat: 30.5200, lng: 79.5200 },
-        { lat: 30.5500, lng: 79.5600 },
-        { lat: 30.7400, lng: 79.4900 }
+        { lat: 26.1445, lng: 91.7362 },
+        { lat: 26.3500, lng: 92.6800 },
+        { lat: 26.5800, lng: 93.1700 },
+        { lat: 26.7500, lng: 94.2200 },
+        { lat: 27.4728, lng: 94.9120 }
       ],
       leafletPath: [
-        [30.1500, 78.3000],
-        [30.2200, 78.7800],
-        [30.2800, 78.9800],
-        [30.3200, 79.2200],
-        [30.4100, 79.4200],
-        [30.4600, 79.4800],
-        [30.5200, 79.5200],
-        [30.5500, 79.5600],
-        [30.7400, 79.4900]
+        [26.1445, 91.7362],
+        [26.3500, 92.6800],
+        [26.5800, 93.1700],
+        [26.7500, 94.2200],
+        [27.4728, 94.9120]
       ]
     },
     {
-      id: 'nh-107',
-      name: 'NH-107 (Rudraprayag - Guptkashi - Kedarnath Highway)',
-      severed: activeHazard?.severedRoads?.some(r => r.includes('NH-107')),
+      id: 'nh-29',
+      name: 'NH-29 / NH-2 (Dimapur - Kohima - Imphal Trans-Asian Lifeline)',
+      severed: activeHazard?.severedRoads?.some(r => r.includes('NH-29') || r.includes('NH-2')),
       path: [
-        { lat: 30.2800, lng: 78.9800 },
-        { lat: 30.3800, lng: 79.0500 },
-        { lat: 30.5200, lng: 79.0800 },
-        { lat: 30.7300, lng: 79.0600 }
+        { lat: 25.9000, lng: 93.7300 },
+        { lat: 25.8000, lng: 93.7500 },
+        { lat: 25.6751, lng: 94.1086 },
+        { lat: 25.5000, lng: 94.1500 },
+        { lat: 24.8170, lng: 93.9368 }
       ],
       leafletPath: [
-        [30.2800, 78.9800],
-        [30.3800, 79.0500],
-        [30.5200, 79.0800],
-        [30.7300, 79.0600]
+        [25.9000, 93.7300],
+        [25.8000, 93.7500],
+        [25.6751, 94.1086],
+        [25.5000, 94.1500],
+        [24.8170, 93.9368]
       ]
     },
     {
-      id: 'nh-134',
-      name: 'NH-134 (Dharasu - Uttarkashi - Silkyara Corridor)',
-      severed: activeHazard?.severedRoads?.some(r => r.includes('NH-134')),
+      id: 'nh-6',
+      name: 'NH-6 (Guwahati - Shillong - Silchar - Agartala Lifeline)',
+      severed: activeHazard?.severedRoads?.some(r => r.includes('NH-6')),
       path: [
-        { lat: 30.3800, lng: 78.3200 },
-        { lat: 30.5500, lng: 78.3800 },
-        { lat: 30.7300, lng: 78.4400 }
+        { lat: 26.1445, lng: 91.7362 },
+        { lat: 25.5788, lng: 91.8933 },
+        { lat: 25.4500, lng: 92.2000 },
+        { lat: 24.8333, lng: 92.7789 },
+        { lat: 23.8315, lng: 91.2868 }
       ],
       leafletPath: [
-        [30.3800, 78.3200],
-        [30.5500, 78.3800],
-        [30.7300, 78.4400]
+        [26.1445, 91.7362],
+        [25.5788, 91.8933],
+        [25.4500, 92.2000],
+        [24.8333, 92.7789],
+        [23.8315, 91.2868]
+      ]
+    },
+    {
+      id: 'nh-306',
+      name: 'NH-306 / NH-54 (Silchar - Kolasib - Aizawl Lifeline)',
+      severed: activeHazard?.severedRoads?.some(r => r.includes('NH-306') || r.includes('NH-54')),
+      path: [
+        { lat: 24.8333, lng: 92.7789 },
+        { lat: 24.2200, lng: 92.6800 },
+        { lat: 23.7271, lng: 92.7176 }
+      ],
+      leafletPath: [
+        [24.8333, 92.7789],
+        [24.2200, 92.6800],
+        [23.7271, 92.7176]
+      ]
+    },
+    {
+      id: 'nh-13',
+      name: 'NH-13 (Trans-Arunachal Highway: Bhalukpong - Itanagar - Pasighat)',
+      severed: activeHazard?.severedRoads?.some(r => r.includes('NH-13')),
+      path: [
+        { lat: 27.0100, lng: 92.6300 },
+        { lat: 27.1004, lng: 93.6166 },
+        { lat: 28.0667, lng: 95.3333 }
+      ],
+      leafletPath: [
+        [27.0100, 92.6300],
+        [27.1004, 93.6166],
+        [28.0667, 95.3333]
       ]
     }
   ];
@@ -467,18 +496,18 @@ export function GisMapCanvas({
             backgroundColor: isDark ? '#090d14' : '#f8fafc',
             restriction: {
               latLngBounds: {
-                north: 32.5,
-                south: 27.5,
-                east: 82.5,
-                west: 76.5
+                north: 30.5,
+                south: 20.5,
+                east: 98.5,
+                west: 88.5
               },
               strictBounds: true
             },
-            minZoom: 7,
+            minZoom: 6,
             maxZoom: 18
           }}
         >
-          {/* Uttarakhand Inverse Boundary Mask & Glowing State Perimeter */}
+          {/* Northeast India (7 Sister States) Inverse Boundary Mask & Glowing State Perimeters */}
           <GooglePolygon
             paths={GOOGLE_MASK_PATHS}
             options={{
@@ -491,15 +520,18 @@ export function GisMapCanvas({
               zIndex: 2
             }}
           />
-          <GooglePolyline
-            path={UTTARAKHAND_PERIMETER_GOOGLE}
-            options={{
-              strokeColor: '#00E5FF',
-              strokeOpacity: 1,
-              strokeWeight: 3.0,
-              zIndex: 3
-            }}
-          />
+          {NORTHEAST_STATE_PERIMETERS.map((sp) => (
+            <GooglePolyline
+              key={sp.id}
+              path={sp.googlePath}
+              options={{
+                strokeColor: '#00E5FF',
+                strokeOpacity: 0.9,
+                strokeWeight: 2.0,
+                zIndex: 3
+              }}
+            />
+          ))}
 
           {/* 1. Official Emergency Directive (Priority 1): Solid Radial Gradient 4-Tier Hazard Zones */}
           {layers.zones && showHazardZones && tiers.length > 0 && tiers.map((tier, idx) => {
@@ -995,7 +1027,7 @@ export function GisMapCanvas({
         <MapContainer
           center={leafletCenter}
           zoom={10}
-          minZoom={7}
+          minZoom={6}
           maxBounds={leafletMaxBounds}
           maxBoundsViscosity={1.0}
           className="w-full h-full z-0"
@@ -1009,7 +1041,7 @@ export function GisMapCanvas({
             maxZoom={19}
           />
 
-          {/* Uttarakhand Inverse Boundary Mask & Glowing State Perimeter */}
+          {/* Northeast India (7 Sister States) Inverse Boundary Mask & Glowing State Perimeters */}
           <LeafletPolygon
             positions={LEAFLET_MASK_POSITIONS}
             interactive={false}
@@ -1021,15 +1053,18 @@ export function GisMapCanvas({
               fillRule: 'evenodd'
             }}
           />
-          <LeafletPolyline
-            positions={UTTARAKHAND_PERIMETER_LEAFLET}
-            interactive={false}
-            pathOptions={{
-              color: '#00E5FF',
-              weight: 3.0,
-              opacity: 1
-            }}
-          />
+          {NORTHEAST_STATE_PERIMETERS.map((sp) => (
+            <LeafletPolyline
+              key={sp.id}
+              positions={sp.leafletPositions}
+              interactive={false}
+              pathOptions={{
+                color: '#00E5FF',
+                weight: 2.0,
+                opacity: 0.9
+              }}
+            />
+          ))}
 
           {/* 1. Official Emergency Directive (Priority 1): Concentric 4-Tier Hazard Zones */}
           {layers.zones && showHazardZones && tiers.length > 0 && tiers.map((tier, idx) => {
@@ -1660,9 +1695,9 @@ export function GisMapCanvas({
                 </div>
               )}
               <div className="flex justify-between text-[10px]">
-                <span className="text-slate-400">Uttarakhand AO:</span>
+                <span className="text-slate-400">Northeast AO:</span>
                 <span className={gpsLocation.isInsideAO ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-                  {gpsLocation.isInsideAO ? 'INSIDE OPERATIONAL AO' : 'BORDER PERIPHERY'}
+                  {gpsLocation.isInsideAO ? 'INSIDE 7 SISTERS AO' : 'BORDER PERIPHERY'}
                 </span>
               </div>
             </div>
@@ -1763,15 +1798,15 @@ export function GisMapCanvas({
             >
               <Navigation className="w-4 h-4 text-cyan-400" />
             </button>
-            <div className={`absolute bottom-full right-0 mb-2 hidden group-hover:flex flex-col gap-1 p-1.5 border shadow-2xl min-w-[230px] text-xs font-telemetry z-30 ${
+            <div className={`absolute bottom-full right-0 mb-2 hidden group-hover:flex flex-col gap-1 p-1.5 border shadow-2xl min-w-[250px] text-xs font-telemetry z-30 ${
               isDark ? 'bg-[#0f131b] border-[#27303e]' : 'bg-white border-[#cbd5e1]'
             }`}>
               <div className="text-[10px] text-slate-400 uppercase font-headline font-bold px-1.5 py-0.5">
-                Uttarakhand Sector Presets
+                Northeast 7 Sisters Sector Presets
               </div>
               <button
                 onClick={() => {
-                  const loc = setSimulatedGps(30.4350, 79.4600, 'Chamoli Helang KM 42');
+                  const loc = setSimulatedGps(26.1445, 91.7362, 'Guwahati Kamrup (Assam)');
                   const pos = { lat: loc.lat, lng: loc.lng };
                   setMapCenter(pos);
                   if (googleMapRef.current) {
@@ -1781,11 +1816,11 @@ export function GisMapCanvas({
                 }}
                 className="text-left px-2 py-1 hover:bg-cyan-950/60 hover:text-cyan-300 transition-colors border border-transparent hover:border-cyan-700"
               >
-                Chamoli Helang KM 42 (Zone 1)
+                Guwahati / Kamrup (Assam)
               </button>
               <button
                 onClick={() => {
-                  const loc = setSimulatedGps(30.5500, 79.5600, 'Joshimath Main Corridor');
+                  const loc = setSimulatedGps(25.5788, 91.8933, 'Shillong Khasi Hills (Meghalaya)');
                   const pos = { lat: loc.lat, lng: loc.lng };
                   setMapCenter(pos);
                   if (googleMapRef.current) {
@@ -1795,11 +1830,11 @@ export function GisMapCanvas({
                 }}
                 className="text-left px-2 py-1 hover:bg-cyan-950/60 hover:text-cyan-300 transition-colors border border-transparent hover:border-cyan-700"
               >
-                Joshimath Main (NH-58)
+                Shillong / Khasi Hills (Meghalaya)
               </button>
               <button
                 onClick={() => {
-                  const loc = setSimulatedGps(30.7350, 79.0669, 'Kedarnath Sonprayag Link');
+                  const loc = setSimulatedGps(23.7271, 92.7176, 'Aizawl Melthum (Mizoram)');
                   const pos = { lat: loc.lat, lng: loc.lng };
                   setMapCenter(pos);
                   if (googleMapRef.current) {
@@ -1809,7 +1844,63 @@ export function GisMapCanvas({
                 }}
                 className="text-left px-2 py-1 hover:bg-cyan-950/60 hover:text-cyan-300 transition-colors border border-transparent hover:border-cyan-700"
               >
-                Kedarnath Sonprayag (NH-107)
+                Aizawl Melthum Ridge (Mizoram)
+              </button>
+              <button
+                onClick={() => {
+                  const loc = setSimulatedGps(25.8000, 93.7500, 'Chumukedima Pagla Pahar (Nagaland)');
+                  const pos = { lat: loc.lat, lng: loc.lng };
+                  setMapCenter(pos);
+                  if (googleMapRef.current) {
+                    googleMapRef.current.panTo(pos);
+                    googleMapRef.current.setZoom(14);
+                  }
+                }}
+                className="text-left px-2 py-1 hover:bg-cyan-950/60 hover:text-cyan-300 transition-colors border border-transparent hover:border-cyan-700"
+              >
+                Chumukedima / NH-29 (Nagaland)
+              </button>
+              <button
+                onClick={() => {
+                  const loc = setSimulatedGps(24.8167, 93.6833, 'Tupul Noney Corridor (Manipur)');
+                  const pos = { lat: loc.lat, lng: loc.lng };
+                  setMapCenter(pos);
+                  if (googleMapRef.current) {
+                    googleMapRef.current.panTo(pos);
+                    googleMapRef.current.setZoom(14);
+                  }
+                }}
+                className="text-left px-2 py-1 hover:bg-cyan-950/60 hover:text-cyan-300 transition-colors border border-transparent hover:border-cyan-700"
+              >
+                Tupul / Noney Gorge (Manipur)
+              </button>
+              <button
+                onClick={() => {
+                  const loc = setSimulatedGps(28.0667, 95.3333, 'Pasighat Upper Siang (Arunachal)');
+                  const pos = { lat: loc.lat, lng: loc.lng };
+                  setMapCenter(pos);
+                  if (googleMapRef.current) {
+                    googleMapRef.current.panTo(pos);
+                    googleMapRef.current.setZoom(14);
+                  }
+                }}
+                className="text-left px-2 py-1 hover:bg-cyan-950/60 hover:text-cyan-300 transition-colors border border-transparent hover:border-cyan-700"
+              >
+                Pasighat / Siang (Arunachal Pradesh)
+              </button>
+              <button
+                onClick={() => {
+                  const loc = setSimulatedGps(23.8315, 91.2868, 'Agartala Howrah (Tripura)');
+                  const pos = { lat: loc.lat, lng: loc.lng };
+                  setMapCenter(pos);
+                  if (googleMapRef.current) {
+                    googleMapRef.current.panTo(pos);
+                    googleMapRef.current.setZoom(14);
+                  }
+                }}
+                className="text-left px-2 py-1 hover:bg-cyan-950/60 hover:text-cyan-300 transition-colors border border-transparent hover:border-cyan-700"
+              >
+                Agartala / Howrah River (Tripura)
               </button>
             </div>
           </div>

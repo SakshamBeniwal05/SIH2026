@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { loadUttarakhandDisasterDataset, UTTARAKHAND_DISTRICTS, UTTARAKHAND_BOUNDS } from './dataset_loader.js';
+import { loadNortheastDisasterDataset, NORTHEAST_DISTRICTS, NORTHEAST_BOUNDS } from './dataset_loader.js';
 import { extractHeatMapKnowledge } from './fetch_and_learn_maps.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,15 +9,15 @@ const __dirname = path.dirname(__filename);
 const MODEL_OUT_PATH = path.join(__dirname, 'landslide_hazard_model.json');
 
 /**
- * Supervised Training & Calibration of Uttarakhand Disaster AI Model
+ * Supervised Training & Calibration of Northeast India Disaster AI Model (7 Sister States)
  */
-export function trainUttarakhandAgent() {
-  console.log('🏔️ [AI Training Engine] Starting training pipeline strictly for Uttarakhand, India...');
+export function trainNortheastAgent() {
+  console.log('🏔️ [AI Training Engine] Starting training pipeline strictly for Northeast India (7 Sister States)...');
 
-  const disasterEvents = loadUttarakhandDisasterDataset();
+  const disasterEvents = loadNortheastDisasterDataset();
   const heatMapKnowledge = extractHeatMapKnowledge();
 
-  console.log(`📊 Loaded ${disasterEvents.length} historical Uttarakhand events (2010–2026).`);
+  console.log(`📊 Loaded ${disasterEvents.length} historical Northeast events across 7 Sister States (2010–2026).`);
   console.log(`🛰️ Analyzed ${heatMapKnowledge.analyzedImagesCount} satellite & radar heat maps.`);
 
   // 1. Calculate Regression Weights for Rainfall -> Radius
@@ -33,12 +33,13 @@ export function trainUttarakhandAgent() {
   const meanRadius = sumRadius / disasterEvents.length;
   const slopeCoeff = (meanRadius / meanRain) * 1.15; // Calibration factor
 
-  // 2. Build District Vulnerability Matrix
+  // 2. Build District Vulnerability Matrix across 7 Sister States
   const districtVulnerability = {};
-  UTTARAKHAND_DISTRICTS.forEach(d => {
-    const matchedEvents = disasterEvents.filter(e => e.district === d.name);
-    const weight = matchedEvents.length > 0 ? 1.0 + (matchedEvents.length * 0.18) : 1.0;
+  NORTHEAST_DISTRICTS.forEach(d => {
+    const matchedEvents = disasterEvents.filter(e => e.district === d.name || e.state === d.state);
+    const weight = matchedEvents.length > 0 ? 1.0 + (matchedEvents.length * 0.15) : 1.0;
     districtVulnerability[d.name] = {
+      state: d.state,
       baseWeight: Number(weight.toFixed(3)),
       basin: d.basin,
       majorRoads: d.majorRoads,
@@ -123,11 +124,11 @@ export function trainUttarakhandAgent() {
   };
 
   const compiledModel = {
-    modelName: 'Uttarakhand Landslide & Cloudburst AI Neural-Hazard Model',
-    version: '2.0.0-UK-ONLY',
+    modelName: 'Northeast India (7 Sister States) Landslide & Cloudburst AI Neural-Hazard Model',
+    version: '2.5.0-NE-7SISTERS',
     trainedAt: new Date().toISOString(),
-    geographicalScope: 'STRICTLY_UTTARAKHAND_INDIA',
-    bounds: UTTARAKHAND_BOUNDS,
+    geographicalScope: 'STRICTLY_NORTHEAST_INDIA_7_SISTERS',
+    bounds: NORTHEAST_BOUNDS,
     trainingDatasetSize: disasterEvents.length,
     satelliteImageryAnalyzed: heatMapKnowledge.analyzedImagesCount,
     hyperparameters: {
@@ -143,6 +144,7 @@ export function trainUttarakhandAgent() {
     trainingEventsSummary: disasterEvents.map(e => ({
       id: e.id,
       name: e.name,
+      state: e.state,
       location: e.location,
       district: e.district,
       coordinates: e.coordinates,
@@ -161,7 +163,10 @@ export function trainUttarakhandAgent() {
   return compiledModel;
 }
 
+// Backward compatibility alias
+export const trainUttarakhandAgent = trainNortheastAgent;
+
 // Auto-run when executed directly
 if (process.argv[1] && process.argv[1].endsWith('train_agent.js')) {
-  trainUttarakhandAgent();
+  trainNortheastAgent();
 }

@@ -202,7 +202,7 @@ export function RightRack({ isCollapsed = false, onToggleCollapse }) {
           </div>
           <div className="flex justify-between font-telemetry text-[10px] text-slate-400">
             <span>Catchment Basin:</span>
-            <span className="text-slate-300">{activeHazard?.simulatedBasin || 'Alaknanda Valley (Chamoli)'}</span>
+            <span className="text-slate-300">{activeHazard?.simulatedBasin || 'Brahmaputra Valley (Guwahati)'}</span>
           </div>
         </div>
 

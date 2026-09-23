@@ -29,12 +29,12 @@ export function ReportHazard() {
   } = useGps();
 
   const [location, setLocation] = useState(
-    gpsLocation ? { lat: gpsLocation.lat, lng: gpsLocation.lng } : { lat: 30.4100, lng: 79.4200 }
+    gpsLocation ? { lat: gpsLocation.lat, lng: gpsLocation.lng } : { lat: 26.1445, lng: 91.7362 }
   );
   const [gpsAcquired, setGpsAcquired] = useState(Boolean(gpsLocation));
   const [category, setCategory] = useState('slope_movement');
   const [severity, setSeverity] = useState('severe');
-  const [description, setDescription] = useState('Fissures widening across NH-58 shoulder near Helang KM 42, Chamoli.');
+  const [description, setDescription] = useState('Active debris cascade and widening fissures observed along NH-29 Pagla Pahar bypass corridor.');
   const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80');
   const [selectedFile, setSelectedFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -234,38 +234,50 @@ export function ReportHazard() {
               <button
                 type="button"
                 onClick={() => handleSelectPresetGps(
-                  30.4350,
-                  79.4600,
-                  'Chamoli Helang KM 42',
-                  'Fresh slope failure & heavy debris spill across NH-58 near Helang KM 42.'
+                  25.8000,
+                  93.7500,
+                  'Chumukedima Pagla Pahar (Nagaland)',
+                  'Active rockfall & debris cascade blocking NH-29 Pagla Pahar corridor.'
                 )}
                 className="px-2 py-0.5 text-[10px] border border-slate-600 hover:border-cyan-500 hover:text-cyan-300 transition-colors"
               >
-                Chamoli Helang KM 42
+                Chumukedima / NH-29
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectPresetGps(
-                  30.7350,
-                  79.0669,
-                  'Kedarnath Sonprayag Link',
-                  'Culvert damage and surging mudflow observed near Sonprayag bridge.'
+                  24.8167,
+                  93.6833,
+                  'Tupul Noney Corridor (Manipur)',
+                  'Severe rotational slope fissure above Tupul yard along Ijai river gorge.'
                 )}
                 className="px-2 py-0.5 text-[10px] border border-slate-600 hover:border-cyan-500 hover:text-cyan-300 transition-colors"
               >
-                Kedarnath Sonprayag
+                Tupul Noney Gorge
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectPresetGps(
-                  30.3165,
-                  78.0322,
-                  'Maldevta Dehradun',
-                  'Riverbank erosion cutting into road foundation at Maldevta corridor.'
+                  23.7271,
+                  92.7176,
+                  'Aizawl Melthum (Mizoram)',
+                  'High-volume debris slump and road foundation subsidence at Melthum ridge.'
                 )}
                 className="px-2 py-0.5 text-[10px] border border-slate-600 hover:border-cyan-500 hover:text-cyan-300 transition-colors"
               >
-                Maldevta Dehradun
+                Aizawl Melthum Ridge
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectPresetGps(
+                  25.1833,
+                  93.0167,
+                  'Dima Hasao Haflong (Assam)',
+                  'Jatinga River flash surge scouring railbed foundations and highway shoulder.'
+                )}
+                className="px-2 py-0.5 text-[10px] border border-slate-600 hover:border-cyan-500 hover:text-cyan-300 transition-colors"
+              >
+                Haflong / Jatinga (Assam)
               </button>
             </div>
           </div>

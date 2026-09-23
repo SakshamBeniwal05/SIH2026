@@ -31,7 +31,7 @@ export function EvacuationBanner({ onSelectAlert }) {
         <div className="w-full bg-slate-800/80 border-b border-slate-700/50 px-3 py-1 flex items-center justify-between text-[11px] font-telemetry text-slate-300 z-30 select-none">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span>BROADCAST ALERTS ACTIVE ({activeHazard.simulatedBasin || 'Uttarakhand Basin'}) — HIDDEN BY USER</span>
+            <span>BROADCAST ALERTS ACTIVE ({activeHazard.simulatedBasin || 'Brahmaputra / 7 Sisters Basin'}) — HIDDEN BY USER</span>
           </div>
           <button
             onClick={() => {

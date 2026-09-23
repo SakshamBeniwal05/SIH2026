@@ -1,298 +1,398 @@
 {
-  "modelName": "Uttarakhand Landslide & Cloudburst AI Neural-Hazard Model",
-  "version": "2.0.0-UK-ONLY",
-  "trainedAt": "2026-09-14T15:26:32.428Z",
-  "geographicalScope": "STRICTLY_UTTARAKHAND_INDIA",
+  "modelName": "Northeast India (7 Sister States) Landslide & Cloudburst AI Neural-Hazard Model",
+  "version": "2.5.0-NE-7SISTERS",
+  "trainedAt": "2026-09-23T18:28:50.513Z",
+  "geographicalScope": "STRICTLY_NORTHEAST_INDIA_7_SISTERS",
   "bounds": {
-    "minLat": 28.7,
-    "maxLat": 31.45,
-    "minLng": 77.5,
-    "maxLng": 81.05
+    "minLat": 21.5,
+    "maxLat": 29.5,
+    "minLng": 89.6,
+    "maxLng": 97.5
   },
-  "trainingDatasetSize": 9,
+  "trainingDatasetSize": 10,
   "satelliteImageryAnalyzed": 5,
   "hyperparameters": {
-    "slopeCoeff": 0.0824,
-    "meanRainMmPerHour": 130.56,
-    "meanRadiusKm": 9.36,
+    "slopeCoeff": 0.0563,
+    "meanRainMmPerHour": 166,
+    "meanRadiusKm": 8.13,
     "criticalPrecipitationThresholdMmPerHour": 65,
     "cloudburstDelugeThresholdMmPerHour": 100,
     "poreSaturationCriticalThresholdPct": 88
   },
   "districtVulnerability": {
-    "Chamoli": {
-      "baseWeight": 1.54,
-      "basin": "Alaknanda River Basin",
+    "Kamrup Metropolitan": {
+      "state": "Assam",
+      "baseWeight": 1.45,
+      "basin": "Brahmaputra River Basin",
       "majorRoads": [
-        "NH-58"
+        "NH-27",
+        "NH-37"
       ],
       "center": {
-        "lat": 30.41,
-        "lng": 79.42
+        "lat": 26.1445,
+        "lng": 91.7362
       }
     },
-    "Rudraprayag": {
-      "baseWeight": 1.36,
-      "basin": "Mandakini River Basin",
+    "Dima Hasao": {
+      "state": "Assam",
+      "baseWeight": 1.45,
+      "basin": "Diyung & Jatinga Valley",
       "majorRoads": [
-        "NH-107",
-        "NH-58"
+        "NH-27 (Haflong Section)"
       ],
       "center": {
-        "lat": 30.2844,
-        "lng": 78.9811
+        "lat": 25.1833,
+        "lng": 93.0167
       }
     },
-    "Uttarkashi": {
-      "baseWeight": 1.36,
-      "basin": "Bhagirathi River Basin",
+    "Cachar": {
+      "state": "Assam",
+      "baseWeight": 1.45,
+      "basin": "Barak River Basin",
       "majorRoads": [
-        "NH-134",
-        "NH-108"
+        "NH-37",
+        "NH-306"
       ],
       "center": {
-        "lat": 30.7268,
-        "lng": 78.4354
+        "lat": 24.8333,
+        "lng": 92.7789
       }
     },
-    "Pithoragarh": {
-      "baseWeight": 1,
-      "basin": "Kali / Gori Ganga Basin",
+    "Dibrugarh": {
+      "state": "Assam",
+      "baseWeight": 1.45,
+      "basin": "Upper Brahmaputra Basin",
       "majorRoads": [
-        "NH-9"
+        "NH-15",
+        "NH-37"
       ],
       "center": {
-        "lat": 29.5829,
-        "lng": 80.2182
+        "lat": 27.4728,
+        "lng": 94.912
       }
     },
-    "Tehri Garhwal": {
-      "baseWeight": 1,
-      "basin": "Bhilangana River Basin",
+    "Papum Pare": {
+      "state": "Arunachal Pradesh",
+      "baseWeight": 1.3,
+      "basin": "Dikrong / Subansiri Basin",
       "majorRoads": [
-        "NH-58",
-        "NH-34"
+        "NH-415",
+        "NH-13"
       ],
       "center": {
-        "lat": 30.38,
-        "lng": 78.48
+        "lat": 27.1004,
+        "lng": 93.6166
       }
     },
-    "Pauri Garhwal": {
-      "baseWeight": 1,
-      "basin": "Nayyar River Basin",
+    "Upper Siang": {
+      "state": "Arunachal Pradesh",
+      "baseWeight": 1.3,
+      "basin": "Siang River Gorge",
       "majorRoads": [
-        "NH-534",
-        "NH-58"
+        "NH-13 (Trans-Arunachal)"
       ],
       "center": {
-        "lat": 30.15,
-        "lng": 78.78
+        "lat": 28.0667,
+        "lng": 95.3333
       }
     },
-    "Dehradun": {
-      "baseWeight": 1.18,
-      "basin": "Song / Asan River Basin",
+    "West Kameng": {
+      "state": "Arunachal Pradesh",
+      "baseWeight": 1.3,
+      "basin": "Kameng River Canyon",
       "majorRoads": [
-        "NH-7",
-        "NH-307"
+        "NH-13"
       ],
       "center": {
-        "lat": 30.3165,
-        "lng": 78.0322
+        "lat": 27.35,
+        "lng": 92.25
       }
     },
-    "Nainital": {
-      "baseWeight": 1.18,
-      "basin": "Kosi / Gaula River Basin",
+    "East Khasi Hills": {
+      "state": "Meghalaya",
+      "baseWeight": 1.15,
+      "basin": "Umiam & Wah Umkhrah Basin",
       "majorRoads": [
-        "NH-109"
+        "NH-6"
       ],
       "center": {
-        "lat": 29.3919,
-        "lng": 79.4542
+        "lat": 25.5788,
+        "lng": 91.8933
       }
     },
-    "Bageshwar": {
-      "baseWeight": 1,
-      "basin": "Saryu River Basin",
+    "Sohra": {
+      "state": "Meghalaya",
+      "baseWeight": 1.15,
+      "basin": "Cherrapunji Limestone Gorges",
       "majorRoads": [
-        "NH-109K"
+        "SH-5 (Sohra Highway)"
       ],
       "center": {
-        "lat": 29.84,
-        "lng": 79.77
+        "lat": 25.27,
+        "lng": 91.73
       }
     },
-    "Champawat": {
-      "baseWeight": 1,
-      "basin": "Lodhika / Sharda Basin",
+    "West Garo Hills": {
+      "state": "Meghalaya",
+      "baseWeight": 1.15,
+      "basin": "Ganol & Simsang Basin",
       "majorRoads": [
-        "NH-9"
+        "NH-217"
       ],
       "center": {
-        "lat": 29.33,
-        "lng": 80.1
+        "lat": 25.5138,
+        "lng": 90.2201
       }
     },
-    "Almora": {
-      "baseWeight": 1,
-      "basin": "Suyal / Kosi Basin",
+    "Noney": {
+      "state": "Manipur",
+      "baseWeight": 1.15,
+      "basin": "Ijai River & Tupul Gorge",
       "majorRoads": [
-        "NH-109"
+        "NH-37 (Imphal-Jiribam)"
       ],
       "center": {
-        "lat": 29.5971,
-        "lng": 79.6591
+        "lat": 24.8167,
+        "lng": 93.6833
       }
     },
-    "Haridwar": {
-      "baseWeight": 1,
-      "basin": "Lower Ganga Plain",
+    "Imphal West": {
+      "state": "Manipur",
+      "baseWeight": 1.15,
+      "basin": "Imphal / Manipur River Basin",
       "majorRoads": [
-        "NH-334",
-        "NH-7"
+        "NH-2",
+        "NH-37"
       ],
       "center": {
-        "lat": 29.9457,
-        "lng": 78.1642
+        "lat": 24.817,
+        "lng": 93.9368
       }
     },
-    "Udham Singh Nagar": {
-      "baseWeight": 1,
-      "basin": "Kalyani / Kumaon Foothills",
+    "Aizawl": {
+      "state": "Mizoram",
+      "baseWeight": 1.15,
+      "basin": "Tlawng River & Melthum Ridge",
       "majorRoads": [
-        "NH-9"
+        "NH-306",
+        "NH-54"
       ],
       "center": {
-        "lat": 28.98,
-        "lng": 79.4
+        "lat": 23.7271,
+        "lng": 92.7176
+      }
+    },
+    "Lunglei": {
+      "state": "Mizoram",
+      "baseWeight": 1.15,
+      "basin": "Chhimtuipui / Kolodyne Basin",
+      "majorRoads": [
+        "NH-54"
+      ],
+      "center": {
+        "lat": 22.8833,
+        "lng": 92.7333
+      }
+    },
+    "Kohima": {
+      "state": "Nagaland",
+      "baseWeight": 1.15,
+      "basin": "Doyang & Zubza River Basin",
+      "majorRoads": [
+        "NH-29",
+        "NH-2"
+      ],
+      "center": {
+        "lat": 25.6751,
+        "lng": 94.1086
+      }
+    },
+    "Dimapur": {
+      "state": "Nagaland",
+      "baseWeight": 1.15,
+      "basin": "Chathe / Dhansiri Corridor",
+      "majorRoads": [
+        "NH-29"
+      ],
+      "center": {
+        "lat": 25.8,
+        "lng": 93.75
+      }
+    },
+    "West Tripura": {
+      "state": "Tripura",
+      "baseWeight": 1.15,
+      "basin": "Howrah River Basin",
+      "majorRoads": [
+        "NH-8"
+      ],
+      "center": {
+        "lat": 23.8315,
+        "lng": 91.2868
+      }
+    },
+    "Dhalai": {
+      "state": "Tripura",
+      "baseWeight": 1.15,
+      "basin": "Dhalai & Khowai Valley",
+      "majorRoads": [
+        "NH-8"
+      ],
+      "center": {
+        "lat": 23.85,
+        "lng": 91.85
       }
     }
   },
   "corridorVulnerabilityIndex": {
-    "NH-58": 0.94,
-    "NH-107": 0.91,
-    "NH-134": 0.82,
-    "NH-109": 0.78
+    "NH-27": 0.92,
+    "NH-29": 0.95,
+    "NH-6": 0.88,
+    "NH-306": 0.93,
+    "NH-37": 0.89,
+    "NH-13": 0.86,
+    "NH-8": 0.79
   },
   "trainingEventsSummary": [
     {
-      "id": "uk-2012-ukhimath",
-      "name": "2012 Ukhimath Landslide",
-      "location": "Ukhimath Town & Mandakini Valley",
-      "district": "Rudraprayag",
+      "id": "ne-2024-aizawl-remal",
+      "name": "2024 Cyclone Remal Melthum Quarry Debris Collapse",
+      "state": "Mizoram",
+      "location": "Melthum Stone Quarry & Aizawl Ridge Corridor",
+      "district": "Aizawl",
       "coordinates": {
-        "lat": 30.517,
-        "lng": 79.1
+        "lat": 23.7271,
+        "lng": 92.7176
       },
-      "disasterType": "Debris Flow / Landslide",
-      "rainfallMmPerHour": 85,
-      "historicalHardMostRadiusKm": 3.5
+      "disasterType": "Catastrophic Quarry Collapse + Slope Liquefaction",
+      "rainfallMmPerHour": 170,
+      "historicalHardMostRadiusKm": 4.8
     },
     {
-      "id": "uk-2012-bhagirathi",
-      "name": "2012 Bhagirathi Valley Cloudburst & Flash Flood",
-      "location": "Bhagirathi River Valley, Uttarkashi",
-      "district": "Uttarkashi",
+      "id": "ne-2022-noney-tupul",
+      "name": "2022 Noney Tupul Railway Yard Landslide",
+      "state": "Manipur",
+      "location": "Tupul Railway Yard, Ijai River Gorge",
+      "district": "Noney",
       "coordinates": {
-        "lat": 30.73,
-        "lng": 78.44
+        "lat": 24.8167,
+        "lng": 93.6833
       },
-      "disasterType": "Cloudburst + Flash Flood",
-      "rainfallMmPerHour": 110,
-      "historicalHardMostRadiusKm": 5
+      "disasterType": "Rotational Debris Avalanche & River Damming",
+      "rainfallMmPerHour": 185,
+      "historicalHardMostRadiusKm": 8.5
     },
     {
-      "id": "uk-2013-kedarnath",
-      "name": "2013 Kedarnath Glacial Lake Outburst & Cloudburst",
-      "location": "Kedarnath Valley, Chorabari Tal, Rambara",
-      "district": "Rudraprayag",
+      "id": "ne-2022-dima-hasao",
+      "name": "2022 Dima Hasao Massive Landslides & Haflong Deluge",
+      "state": "Assam",
+      "location": "New Haflong Station & Jatinga Hill Section",
+      "district": "Dima Hasao",
       "coordinates": {
-        "lat": 30.7352,
-        "lng": 79.0669
+        "lat": 25.1833,
+        "lng": 93.0167
       },
-      "disasterType": "GLOF + Cloudburst + Catastrophic Talus Surge",
-      "rainfallMmPerHour": 220,
-      "historicalHardMostRadiusKm": 10
-    },
-    {
-      "id": "uk-2021-chamoli",
-      "name": "2021 Chamoli Rock/Ice Avalanche & Flash Surge",
-      "location": "Ronti Peak, Rishiganga & Tapovan Canyons",
-      "district": "Chamoli",
-      "coordinates": {
-        "lat": 30.45,
-        "lng": 79.63
-      },
-      "disasterType": "Rock/Ice Avalanche Debris Torrent",
-      "rainfallMmPerHour": 140,
-      "historicalHardMostRadiusKm": 15
-    },
-    {
-      "id": "uk-2021-nainital",
-      "name": "2021 Nainital–Ramgarh Extreme Cloudburst Deluge",
-      "location": "Nainital Core, Ramgarh, Mukteshwar",
-      "district": "Nainital",
-      "coordinates": {
-        "lat": 29.3919,
-        "lng": 79.4542
-      },
-      "disasterType": "Localized Microburst + Mudslide",
+      "disasterType": "Multiple Slope Failures & Railbed Liquefaction",
       "rainfallMmPerHour": 160,
-      "historicalHardMostRadiusKm": 25
+      "historicalHardMostRadiusKm": 12
     },
     {
-      "id": "uk-2022-maldevta",
-      "name": "2022 Maldevta & Raipur Flash Flood Surge",
-      "location": "Maldevta, Sarkhet, Thano Canyon",
-      "district": "Dehradun",
+      "id": "ne-2020-cherrapunji",
+      "name": "2020 Sohra-Cherrapunji Extreme Orographic Deluge",
+      "state": "Meghalaya",
+      "location": "Cherrapunji Rim, Nohkalikai Gorge, Shella",
+      "district": "Sohra",
       "coordinates": {
-        "lat": 30.3165,
-        "lng": 78.12
+        "lat": 25.27,
+        "lng": 91.73
       },
-      "disasterType": "Orographic Cloudburst Scouring",
-      "rainfallMmPerHour": 175,
+      "disasterType": "Orographic Cloudburst + Escarpment Mudslide",
+      "rainfallMmPerHour": 235,
+      "historicalHardMostRadiusKm": 14
+    },
+    {
+      "id": "ne-2021-pagla-pahar",
+      "name": "2021 Chumukedima Pagla Pahar Rockfall & Mudflow",
+      "state": "Nagaland",
+      "location": "Pagla Pahar Chokepoint, Chathe River Gorge",
+      "district": "Dimapur",
+      "coordinates": {
+        "lat": 25.8,
+        "lng": 93.75
+      },
+      "disasterType": "Co-Seismic / Monsoon Rockfall Cascade",
+      "rainfallMmPerHour": 130,
+      "historicalHardMostRadiusKm": 3.2
+    },
+    {
+      "id": "ne-2023-siang-glof",
+      "name": "2023 Upper Siang Flash Surge & Landslide Dam Threat",
+      "state": "Arunachal Pradesh",
+      "location": "Tuting, Pasighat & Siang River Canyon",
+      "district": "Upper Siang",
+      "coordinates": {
+        "lat": 28.0667,
+        "lng": 95.3333
+      },
+      "disasterType": "Landslide Dam Outburst Flood (LDOF) / Glacial Surge",
+      "rainfallMmPerHour": 150,
       "historicalHardMostRadiusKm": 15
     },
     {
-      "id": "uk-2023-silkyara",
-      "name": "2023 Silkyara Bend-Barkot Tunnel Geo-Collapse",
-      "location": "Silkyara Portal, Yamunotri Highway Corridor",
-      "district": "Uttarkashi",
+      "id": "ne-2024-tripura-gomati",
+      "name": "2024 Tripura Gomati River Deluge & Embankment Breach",
+      "state": "Tripura",
+      "location": "Howrah River Basin, Agartala, Gomati Valley",
+      "district": "West Tripura",
       "coordinates": {
-        "lat": 30.75,
-        "lng": 78.26
+        "lat": 23.8315,
+        "lng": 91.2868
       },
-      "disasterType": "Shear-Zone Tunnel Cave-In / Rockfall",
-      "rainfallMmPerHour": 45,
-      "historicalHardMostRadiusKm": 2
+      "disasterType": "Flash Flood + Valley Mudslides + Dyke Scouring",
+      "rainfallMmPerHour": 145,
+      "historicalHardMostRadiusKm": 6.5
     },
     {
-      "id": "uk-2023-joshimath",
-      "name": "2023 Joshimath Urban Land Subsidence Crisis",
-      "location": "Joshimath Town, Sunil, Manohar Bagh",
-      "district": "Chamoli",
+      "id": "ne-2016-tawang",
+      "name": "2016 Tawang Terraced Slope Failure",
+      "state": "Arunachal Pradesh",
+      "location": "Phamla Village, Tawang Escarpment",
+      "district": "West Kameng",
       "coordinates": {
-        "lat": 30.55,
-        "lng": 79.56
+        "lat": 27.35,
+        "lng": 92.25
       },
-      "disasterType": "Progressive Glacial-Moraine Subsidence",
-      "rainfallMmPerHour": 60,
-      "historicalHardMostRadiusKm": 3.5
+      "disasterType": "High-Altitude Talus Slump & Debris Avalanche",
+      "rainfallMmPerHour": 120,
+      "historicalHardMostRadiusKm": 2.8
     },
     {
-      "id": "uk-2026-alaknanda-projected",
-      "name": "2026 Upper Alaknanda Monsoon Shear Deluge (Projected Scenario)",
-      "location": "Helang KM 42, Pipalkoti, Alaknanda Gorge",
-      "district": "Chamoli",
+      "id": "ne-2022-silchar-barak",
+      "name": "2022 Silchar Barak River Megaflood & Scouring",
+      "state": "Assam",
+      "location": "Bethukandi Embankment, Silchar Urban Basin",
+      "district": "Cachar",
       "coordinates": {
-        "lat": 30.435,
-        "lng": 79.46
+        "lat": 24.8333,
+        "lng": 92.7789
       },
-      "disasterType": "Convective Cloudburst + Talus Slump",
-      "rainfallMmPerHour": 180,
-      "historicalHardMostRadiusKm": 5.2
+      "disasterType": "Dyke Failure / Massive Riparian Scouring",
+      "rainfallMmPerHour": 190,
+      "historicalHardMostRadiusKm": 9
+    },
+    {
+      "id": "ne-2026-brahmaputra-projected",
+      "name": "2026 Brahmaputra Valley Monsoon High-Shear Deluge (Projected Scenario)",
+      "state": "Assam",
+      "location": "Guwahati Hills, Nilachal Escarpment, Khanapara Corridor",
+      "district": "Kamrup Metropolitan",
+      "coordinates": {
+        "lat": 26.1445,
+        "lng": 91.7362
+      },
+      "disasterType": "Convective Microburst + Urban Flash Flood + Talus Slump",
+      "rainfallMmPerHour": 175,
+      "historicalHardMostRadiusKm": 5.5
     }
   ],
   "palettes": {

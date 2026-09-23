@@ -67,18 +67,23 @@ export function CommandCenter() {
   }, []);
 
   const handleSelectSector = (sectorKey) => {
-    let coords = null;
-    if (sectorKey === 'chamoli') {
-      coords = [30.4100, 79.4200];
-    } else if (sectorKey === 'kedarnath') {
-      coords = [30.7300, 79.0600];
-    } else if (sectorKey === 'joshimath') {
-      coords = [30.5500, 79.5600];
-    } else if (sectorKey === 'dehradun') {
-      coords = [30.3165, 78.0322];
-    } else if (sectorKey === 'uttarkashi') {
-      coords = [30.7300, 78.4400];
-    }
+    const coordsMap = {
+      guwahati: [26.1445, 91.7362],
+      shillong: [25.5788, 91.8933],
+      aizawl: [23.7271, 92.7176],
+      kohima: [25.6751, 94.1086],
+      imphal: [24.8167, 93.6833],
+      itanagar: [27.1004, 93.6166],
+      agartala: [23.8315, 91.2868],
+      haflong: [25.1833, 93.0167],
+      // Backward compatibility aliases
+      chamoli: [26.1445, 91.7362],
+      kedarnath: [25.5788, 91.8933],
+      joshimath: [23.7271, 92.7176],
+      dehradun: [25.6751, 94.1086],
+      uttarkashi: [24.8167, 93.6833]
+    };
+    const coords = coordsMap[sectorKey];
 
     if (coords) {
       setSelectedCoords(coords);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '../components/common/Header';
 import { GisMapCanvas } from '../components/gis/GisMapCanvas';
 import { EvacuationBanner } from '../components/alerts/EvacuationBanner';
@@ -84,15 +84,20 @@ export function GisMapView() {
 
   const handleSelectSector = (sectorKey) => {
     const coordsMap = {
-      chamoli: [30.4100, 79.4200],
-      kedarnath: [30.7300, 79.0600],
-      joshimath: [30.5500, 79.5600],
-      dehradun: [30.3165, 78.0322],
-      uttarkashi: [30.7300, 78.4400],
-      pithoragarh: [29.5800, 80.2200],
-      nainital: [29.3800, 79.4600],
-      almora: [29.6000, 79.6600],
-      tehri: [30.3800, 78.4800]
+      guwahati: [26.1445, 91.7362],
+      shillong: [25.5788, 91.8933],
+      aizawl: [23.7271, 92.7176],
+      kohima: [25.6751, 94.1086],
+      imphal: [24.8167, 93.6833],
+      itanagar: [27.1004, 93.6166],
+      agartala: [23.8315, 91.2868],
+      haflong: [25.1833, 93.0167],
+      // Backward compatibility aliases
+      chamoli: [26.1445, 91.7362],
+      kedarnath: [25.5788, 91.8933],
+      joshimath: [23.7271, 92.7176],
+      dehradun: [25.6751, 94.1086],
+      uttarkashi: [24.8167, 93.6833]
     };
     const coords = coordsMap[sectorKey];
     if (coords) {
@@ -150,7 +155,7 @@ export function GisMapView() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 telemetry-pulse-node" />
                 <span className="uppercase text-slate-300">
-                  {activeHazard?.simulatedBasin || 'Sector Chamoli Alaknanda'}
+                  {activeHazard?.simulatedBasin || 'Sector Brahmaputra Valley (Guwahati)'}
                 </span>
                 <span className="text-red-400 font-telemetry">
                   [{activeHazard?.rainfallRateMmPerHour || 180} mm/hr]

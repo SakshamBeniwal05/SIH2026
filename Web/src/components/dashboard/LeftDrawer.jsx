@@ -128,10 +128,10 @@ export function LeftDrawer({
             <Radar className="w-5 h-5 text-[#D32F2F] animate-pulse" />
             <div>
               <h2 className="font-headline font-bold text-xs uppercase tracking-widest leading-none">
-                SECTOR TAC-GARHWAL
+                SECTOR TAC-NORTHEAST
               </h2>
               <p className="font-label text-[10px] text-[#0288D1] font-semibold mt-0.5">
-                {activeHazard?.simulatedBasin || 'Alaknanda Valley (Chamoli)'}
+                {activeHazard?.simulatedBasin || 'Brahmaputra Valley (Guwahati / Kamrup)'}
               </p>
             </div>
           </div>
@@ -279,7 +279,7 @@ export function LeftDrawer({
                         coords: [hazardLat, hazardLng],
                         zoom: 11,
                         title: 'OFFICIAL GOVERNMENT EMERGENCY ORDER',
-                        basin: activeHazard.simulatedBasin || 'Alaknanda Valley (Chamoli)',
+                        basin: activeHazard.simulatedBasin || 'Brahmaputra Valley (Guwahati / Kamrup)',
                         rain: activeHazard.rainfallRateMmPerHour || 165
                       });
                     }
@@ -305,7 +305,7 @@ export function LeftDrawer({
                   </div>
 
                   <h3 className="font-headline font-bold text-xs text-white mb-1">
-                    {activeHazard.simulatedBasin || 'Alaknanda Valley (Chamoli)'}
+                    {activeHazard.simulatedBasin || 'Brahmaputra Valley (Guwahati / Kamrup)'}
                   </h3>
 
                   <p className="font-body text-[11px] text-slate-300 mb-2">
@@ -476,16 +476,6 @@ export function LeftDrawer({
                     {report.description}
                   </p>
 
-                  {/* Report Image Thumbnail if present */}
-                  {report.mediaUrl && (
-                    <div className="w-full h-20 overflow-hidden mb-2 border border-slate-700/60">
-                      <img
-                        src={report.mediaUrl}
-                        alt="Field Telemetry Evidence"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                    </div>
-                  )}
 
                   {/* Footer Coordinates & Redirection Cue */}
                   <div className="flex items-center justify-between font-telemetry text-[10px] text-slate-400 pt-1.5 border-t border-slate-800">
@@ -616,25 +606,25 @@ export function LeftDrawer({
           <div className="space-y-2">
             <div className={`p-2.5 border ${isDark ? 'bg-[#181c23] border-[#27303e]' : 'bg-white border-[#cbd5e1]'}`}>
               <div className="flex justify-between items-center font-headline text-xs font-bold mb-1">
-                <span>SDRF Uttarakhand (Chamoli / Joshimath Unit)</span>
+                <span>SDRF Assam & SDRF Meghalaya (Unified Response)</span>
                 <span className="px-1.5 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-600 text-[9px]">
                   DEPLOYED
                 </span>
               </div>
               <p className="font-body text-xs text-slate-300">
-                Positioned at Helang KM 42 cordon on NH-58. Evacuation transport convoys en route to Joshimath Relief Staging area.
+                Positioned along Khanapara and GS Road corridor. Evacuation transport convoys active across low-lying floodplains.
               </p>
             </div>
 
             <div className={`p-2.5 border ${isDark ? 'bg-[#181c23] border-[#27303e]' : 'bg-white border-[#cbd5e1]'}`}>
               <div className="flex justify-between items-center font-headline text-xs font-bold mb-1">
-                <span>NDRF 15th Battalion (Rishikesh / Srinagar Detachment)</span>
+                <span>NDRF 1st Bn (Patgaon, Guwahati) & NDRF 12th Bn (Doimukh)</span>
                 <span className="px-1.5 py-0.5 bg-amber-950 text-amber-400 border border-amber-600 text-[9px]">
                   STANDBY
                 </span>
               </div>
               <p className="font-body text-xs text-slate-300">
-                Standby at Rudraprayag hub equipped with drone LIDAR survey rig & geotechnical excavator units.
+                Rapid response tactical teams deployed with deep-water rescue inflatables, drone LIDAR survey rigs & slope earthmovers.
               </p>
             </div>
           </div>

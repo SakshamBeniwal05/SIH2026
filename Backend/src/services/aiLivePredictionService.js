@@ -2,23 +2,25 @@ import { generateAiClimaticPrediction, crossCheckHistoricalDisaster } from '../.
 import { db } from '../config/db.js';
 
 /**
- * Key Meteorological Observation Points strictly across Uttarakhand Disaster Corridors
+ * Key Meteorological Observation Points strictly across Northeast India (7 Sister States) Disaster Corridors
  */
-export const UTTARAKHAND_WEATHER_STATIONS = [
-  { id: 'chamoli', name: 'Alaknanda Valley (Chamoli / Joshimath)', lat: 30.4100, lng: 79.4200, defaultPore: 82.0 },
-  { id: 'mandakini', name: 'Mandakini Basin (Kedarnath / Rudraprayag)', lat: 30.7300, lng: 79.0600, defaultPore: 81.5 },
-  { id: 'bhagirathi', name: 'Bhagirathi Valley (Uttarkashi / Silkyara)', lat: 30.7300, lng: 78.4400, defaultPore: 77.0 },
-  { id: 'song', name: 'Song River Basin (Maldevta / Dehradun)', lat: 30.3165, lng: 78.0322, defaultPore: 74.0 },
-  { id: 'pithoragarh', name: 'Pithoragarh & Kali Valley (Malpa / Dharchula)', lat: 29.9800, lng: 80.7500, defaultPore: 79.0 },
-  { id: 'nainital', name: 'Nainital & Kosi Valley (Bhowali / Haldwani)', lat: 29.3919, lng: 79.4542, defaultPore: 76.0 },
-  { id: 'almora', name: 'Almora & Suyal Basin (Ranikhet / Kausani)', lat: 29.5971, lng: 79.6591, defaultPore: 72.0 },
-  { id: 'tehri', name: 'Tehri Garhwal (Bhilangana / New Tehri)', lat: 30.3800, lng: 78.4800, defaultPore: 75.0 }
+export const NORTHEAST_WEATHER_STATIONS = [
+  { id: 'guwahati', name: 'Brahmaputra Valley (Guwahati / Kamrup, Assam)', lat: 26.1445, lng: 91.7362, defaultPore: 85.0 },
+  { id: 'shillong', name: 'Khasi & Jaintia Hills (Shillong / Cherrapunji, Meghalaya)', lat: 25.5788, lng: 91.8933, defaultPore: 92.5 },
+  { id: 'aizawl', name: 'Aizawl Ridge & Chhimtuipui Basin (Mizoram)', lat: 23.7271, lng: 92.7176, defaultPore: 90.0 },
+  { id: 'imphal_noney', name: 'Imphal Basin & Noney Corridor (Manipur)', lat: 24.8167, lng: 93.6833, defaultPore: 89.5 },
+  { id: 'kohima', name: 'Kohima & Chumukedima Gorge (Nagaland)', lat: 25.6751, lng: 94.1086, defaultPore: 87.0 },
+  { id: 'itanagar_siang', name: 'Siang & Papum Pare Basin (Arunachal Pradesh)', lat: 27.1004, lng: 93.6166, defaultPore: 86.5 },
+  { id: 'silchar_dima', name: 'Dima Hasao & Barak Valley (Haflong / Silchar, Assam)', lat: 25.1833, lng: 93.0167, defaultPore: 88.0 },
+  { id: 'agartala', name: 'Howrah Basin & Dhalai (Tripura)', lat: 23.8315, lng: 91.2868, defaultPore: 82.0 }
 ];
+
+export const UTTARAKHAND_WEATHER_STATIONS = NORTHEAST_WEATHER_STATIONS;
 
 export class AiLivePredictionService {
   constructor(io = null) {
     this.io = io;
-    this.monitoredStationId = 'chamoli';
+    this.monitoredStationId = 'guwahati';
     this.customWeatherOverride = null;
     this.timer = null;
     this.isFetching = false;
@@ -29,7 +31,7 @@ export class AiLivePredictionService {
   }
 
   setMonitoredStation(stationId) {
-    const found = UTTARAKHAND_WEATHER_STATIONS.find(s => s.id === stationId);
+    const found = NORTHEAST_WEATHER_STATIONS.find(s => s.id === stationId);
     if (found) {
       this.monitoredStationId = found.id;
       console.log(`📍 [AI Prediction Service] Locked monitored corridor to: ${found.name}`);
@@ -119,8 +121,8 @@ export class AiLivePredictionService {
       if (customWeather !== null && customWeather !== undefined) {
         this.customWeatherOverride = customWeather;
       }
-      const targetStationId = this.monitoredStationId || 'chamoli';
-      const station = UTTARAKHAND_WEATHER_STATIONS.find(s => s.id === targetStationId) || UTTARAKHAND_WEATHER_STATIONS[0];
+      const targetStationId = this.monitoredStationId || 'guwahati';
+      const station = NORTHEAST_WEATHER_STATIONS.find(s => s.id === targetStationId) || NORTHEAST_WEATHER_STATIONS[0];
 
       // 1. Obtain meteorological & soil conditions (either custom simulation or live Open-Meteo)
       let liveMetrics;

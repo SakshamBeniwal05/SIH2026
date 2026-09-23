@@ -1,20 +1,23 @@
 """
-Uttarakhand Landslide & Cloudburst AI Model Training Script (Python)
-Trained on Data/ historical records & web map imagery (strictly Uttarakhand, India).
+Northeast India (7 Sister States) Landslide & Cloudburst AI Model Training Script (Python)
+Trained on Data/ historical records & web map imagery (strictly 7 Sister States, Northeast India).
 """
 import os
 import json
 import math
 
-UTTARAKHAND_BOUNDS = {
-    "minLat": 28.70,
-    "maxLat": 31.45,
-    "minLng": 77.50,
-    "maxLng": 81.05
+NORTHEAST_BOUNDS = {
+    "minLat": 21.50,
+    "maxLat": 29.50,
+    "minLng": 89.60,
+    "maxLng": 97.50
 }
 
+# Backward compatibility alias
+UTTARAKHAND_BOUNDS = NORTHEAST_BOUNDS
+
 def train_python_model():
-    print("[Python AI Agent] Ingesting Uttarakhand historical disaster records...")
+    print("[Python AI Agent] Ingesting Northeast India (7 Sister States) historical disaster records...")
     # Load model parameters derived from Data/
     model_path = os.path.join(os.path.dirname(__file__), 'landslide_hazard_model.json')
     if os.path.exists(model_path):

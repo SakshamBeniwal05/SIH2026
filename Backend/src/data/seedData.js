@@ -1,79 +1,109 @@
 export const SEED_BASINS = [
   {
-    id: 'alaknanda',
-    name: 'Alaknanda Valley (Chamoli / Joshimath)',
-    region: 'Uttarakhand (Garhwal Himalaya)',
-    epicenter: { lat: 30.4100, lng: 79.4200 },
+    id: 'brahmaputra',
+    name: 'Brahmaputra Valley (Guwahati / Kamrup)',
+    region: 'Assam (Lower Brahmaputra Plain)',
+    epicenter: { lat: 26.1445, lng: 91.7362 },
     defaultRainfall: 165,
     criticalRoads: [
-      'NH-58 (Rishikesh-Joshimath-Badrinath Lifeline)',
-      'Helang-Joshimath Bypass Link Road',
-      'Tapovan-Rishiganga Access Route'
+      'NH-27 (Guwahati Bypass Lifeline)',
+      'GS Road Shillong Arterial Corridor',
+      'Kamakhya Foothills Bypass'
     ],
-    vulnerableVillages: ['Helang', 'Pipalkoti', 'Joshimath Lower Ridge', 'Birahi', 'Tapovan']
+    vulnerableVillages: ['Khanapara', 'Nilachal Foothills', 'Jalukbari', 'Noonmati', 'Dispur Buffer']
   },
   {
-    id: 'mandakini',
-    name: 'Mandakini Basin (Kedarnath / Rudraprayag)',
-    region: 'Uttarakhand (Rudraprayag District)',
-    epicenter: { lat: 30.7300, lng: 79.0600 },
+    id: 'khasi-hills',
+    name: 'Khasi & Jaintia Hills (Shillong / Cherrapunji)',
+    region: 'Meghalaya (Meghalaya Plateau)',
+    epicenter: { lat: 25.5788, lng: 91.8933 },
+    defaultRainfall: 215,
+    criticalRoads: [
+      'NH-6 (Shillong-Jowai-Silchar Lifeline)',
+      'SH-5 (Sohra-Shella Gorges Artery)',
+      'Mawkdok Dympep Bridge Link'
+    ],
+    vulnerableVillages: ['Cherrapunji Core', 'Mawkdok', 'Nohkalikai Valley', 'Pynursla', 'Mawsynram']
+  },
+  {
+    id: 'aizawl-ridge',
+    name: 'Aizawl Ridge & Chhimtuipui Basin',
+    region: 'Mizoram (Lushai Hills)',
+    epicenter: { lat: 23.7271, lng: 92.7176 },
+    defaultRainfall: 175,
+    criticalRoads: [
+      'NH-306 (Silchar-Aizawl National Highway Lifeline)',
+      'Melthum-Bualpui Ridge Arterial Link',
+      'Aizawl World Bank Bypass'
+    ],
+    vulnerableVillages: ['Melthum', 'Bawngkawn', 'Durtlang Leitan', 'Ramhlun', 'Kulikawn']
+  },
+  {
+    id: 'noney-tupul',
+    name: 'Ijai Basin & Tupul Gorge (Noney Corridor)',
+    region: 'Manipur (Western Hill Tracts)',
+    epicenter: { lat: 24.8167, lng: 93.6833 },
     defaultRainfall: 185,
     criticalRoads: [
-      'NH-107 (Rudraprayag-Guptkashi-Kedarnath Highway)',
-      'Kund-Gopeshwar Arterial Route'
+      'NH-37 (Imphal-Jiribam Lifeline Highway)',
+      'Tupul Railway Approach Corridor',
+      'Noney-Khongsang Link Road'
     ],
-    vulnerableVillages: ['Gaurikund', 'Sonprayag', 'Guptkashi', 'Agastyamuni', 'Rambara Buffer']
+    vulnerableVillages: ['Tupul Station Yard', 'Marangching', 'Makhuam', 'Ijai River Plain', 'Noney Bazaar']
   },
   {
-    id: 'bhagirathi',
-    name: 'Bhagirathi Valley (Uttarkashi / Silkyara)',
-    region: 'Uttarakhand (Uttarkashi District)',
-    epicenter: { lat: 30.7300, lng: 78.4400 },
+    id: 'chumukedima',
+    name: 'Kohima & Chumukedima Pagla Pahar Gorge',
+    region: 'Nagaland (Naga Hills)',
+    epicenter: { lat: 25.8000, lng: 93.7500 },
+    defaultRainfall: 150,
+    criticalRoads: [
+      'NH-29 (Dimapur-Kohima Trans-Asian Lifeline)',
+      'Chumukedima Old Bypass Link',
+      'Zubza-Kohima Ridge Arterial Highway'
+    ],
+    vulnerableVillages: ['Pagla Pahar Chokepoint', 'New Chumukedima', 'Phesama', 'Zubza', 'Jotsoma']
+  },
+  {
+    id: 'siang-gorge',
+    name: 'Upper Siang & Pasighat Basin',
+    region: 'Arunachal Pradesh (Eastern Himalaya)',
+    epicenter: { lat: 28.0667, lng: 95.3333 },
+    defaultRainfall: 160,
+    criticalRoads: [
+      'NH-13 (Trans-Arunachal Highway)',
+      'Pasighat-Pangin-Along Highway',
+      'Yingkiong Border Arterial Road'
+    ],
+    vulnerableVillages: ['Pasighat', 'Tuting', 'Pangin', 'Yingkiong', 'Geku River Buffer']
+  },
+  {
+    id: 'howrah-river',
+    name: 'Howrah Basin & Dhalai Valley',
+    region: 'Tripura (Tripura Trough)',
+    epicenter: { lat: 23.8315, lng: 91.2868 },
     defaultRainfall: 140,
     criticalRoads: [
-      'NH-134 (Silkyara Bend-Barkot Highway)',
-      'NH-34 (Dharasu-Uttarkashi-Gangotri Corridor)'
+      'NH-8 (Assam-Agartala Highway)',
+      'Howrah River Bund Arteries',
+      'Ambassa-Manu Chokepoint'
     ],
-    vulnerableVillages: ['Silkyara Portal', 'Dharasu Bend', 'Maneri', 'Bhatwari', 'Barkot']
-  },
-  {
-    id: 'song-river',
-    name: 'Song River Basin (Maldevta / Dehradun)',
-    region: 'Uttarakhand (Dehradun Foothills)',
-    epicenter: { lat: 30.3165, lng: 78.0322 },
-    defaultRainfall: 130,
-    criticalRoads: [
-      'Maldevta-Kumalda-Sahastradhara Road',
-      'Raipur-Thano Forest Link'
-    ],
-    vulnerableVillages: ['Maldevta', 'Kumalda', 'Sarkhet Village', 'Song River Embankment Belt']
-  },
-  {
-    id: 'pithoragarh',
-    name: 'Pithoragarh & Kali Valley (Malpa / Dharchula)',
-    region: 'Uttarakhand (Kumaon Himalaya)',
-    epicenter: { lat: 29.9800, lng: 80.7500 },
-    defaultRainfall: 155,
-    criticalRoads: [
-      'NH-9 (Tanakpur-Pithoragarh-Dharchula Highway)',
-      'Tawaghat-Lipulekh Border Highway'
-    ],
-    vulnerableVillages: ['Malpa', 'Dharchula', 'Balwakot', 'Jauljibi', 'Pangla']
+    vulnerableVillages: ['Agartala East Plain', 'Champaknagar', 'Teliamura', 'Ambassa', 'Manu']
   }
 ];
 
 export const SEED_HAZARDS = [
   {
-    _id: 'hazard-uk-alaknanda-active',
-    title: 'Severe Slope Failure & Debris Surge — Alaknanda Valley (Chamoli)',
-    simulatedBasin: 'Alaknanda Valley (Chamoli / Joshimath)',
+    _id: 'hazard-ne-brahmaputra-active',
+    title: 'Severe Slope Failure & Debris Surge — Brahmaputra Valley (Guwahati)',
+    simulatedBasin: 'Brahmaputra Valley (Guwahati / Kamrup)',
     rainfallRateMmPerHour: 165,
     status: 'standby',
     location: {
       type: 'Point',
-      coordinates: [79.4200, 30.4100] // [lng, lat]
+      coordinates: [91.7362, 26.1445] // [lng, lat]
     },
-    officialActive: false, // Official Government Alert is strictly triggered by Frontend Admin
+    officialActive: false,
     current: null,
     officialAlert: null,
     prediction: null,
@@ -89,54 +119,54 @@ export const SEED_HAZARDS = [
 
 export const SEED_REPORTS = [
   {
-    _id: 'rep-uk-001',
-    mediaUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Tapovan_pre_post_NRSC_cropped.jpg',
+    _id: 'rep-ne-001',
+    mediaUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Tupul_railway_station_under_construction.jpg/800px-Tupul_railway_station_under_construction.jpg',
     category: 'crack',
     severityObserved: 'critical',
     location: {
       type: 'Point',
-      coordinates: [79.4500, 30.4300] // Helang / Chamoli
+      coordinates: [93.6833, 24.8167] // Tupul / Noney, Manipur
     },
-    description: 'Widening slope fissure extending 3.2m across NH-58 shoulder near Helang. Substantial roadbed subsidence.',
+    description: 'Deep rotational crown crack extending 4.2m across the upper cut-slope of Tupul Railway yard. High impending debris avalanche threat.',
     agentEvaluated: true,
     createdAt: new Date(Date.now() - 1800000).toISOString()
   },
   {
-    _id: 'rep-uk-002',
-    mediaUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a0/2023_Uttarakhand_tunnel_collapse.jpg',
+    _id: 'rep-ne-002',
+    mediaUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Aizawl_city_view.jpg/800px-Aizawl_city_view.jpg',
     category: 'slope_movement',
     severityObserved: 'critical',
     location: {
       type: 'Point',
-      coordinates: [79.5600, 30.5500] // Joshimath
+      coordinates: [92.7176, 23.7271] // Melthum / Aizawl, Mizoram
     },
-    description: 'Active talus shear slide and slope subsidence observed along Sunil Ward / Joshimath Lower Ridge.',
+    description: 'Active talus shear slip and slope liquefaction observed along Melthum stone quarry ridge following relentless monsoon downpour.',
     agentEvaluated: true,
     createdAt: new Date(Date.now() - 2400000).toISOString()
   },
   {
-    _id: 'rep-uk-003',
-    mediaUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/62/The_Indian_Air_Force_personnel_unloading_relief_materials_from_a_chopper_during_their_flood_relief_operations%2C_at_Guptakashi_near_flood-hit_Kedarnath%2C_in_Uttarakhand.jpg',
+    _id: 'rep-ne-003',
+    mediaUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Dimapur_Nagaland.jpg/800px-Dimapur_Nagaland.jpg',
     category: 'road_blocked',
     severityObserved: 'severe',
     location: {
       type: 'Point',
-      coordinates: [79.0500, 30.6300] // Sonprayag / Kedarnath corridor
+      coordinates: [93.7500, 25.8000] // Pagla Pahar, Nagaland
     },
-    description: 'Massive rockfall obstructing NH-107 between Guptkashi and Sonprayag. Heavy transport completely halted.',
+    description: 'Massive boulders cascaded onto NH-29 Pagla Pahar bypass corridor. Complete obstruction of interstate vehicular movement.',
     agentEvaluated: true,
     createdAt: new Date(Date.now() - 600000).toISOString()
   },
   {
-    _id: 'rep-uk-004',
-    mediaUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/77/1999Chamoli.png',
+    _id: 'rep-ne-004',
+    mediaUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/New_Haflong_railway_station.jpg/800px-New_Haflong_railway_station.jpg',
     category: 'bridge_damage',
     severityObserved: 'severe',
     location: {
       type: 'Point',
-      coordinates: [78.0800, 30.3300] // Maldevta Dehradun
+      coordinates: [93.0167, 25.1833] // Dima Hasao, Assam
     },
-    description: 'Song River flash surge eroded left abutment protection of Maldevta Bridge. High scouring risk.',
+    description: 'Jatinga River flash surge eroded bridge foundation piers and railbed embankment near Haflong hill section.',
     agentEvaluated: false,
     createdAt: new Date(Date.now() - 3200000).toISOString()
   }
@@ -144,50 +174,50 @@ export const SEED_REPORTS = [
 
 export const SEED_SENSORS = [
   {
-    id: 'SN-UK-501',
-    name: 'Joshimath Sunil Ridge Tiltmeter',
+    id: 'SN-NE-501',
+    name: 'Chumukedima Pagla Pahar Tiltmeter',
     type: 'Biaxial Inclinometer',
-    coords: [79.5600, 30.5500],
-    saturation: 93.8,
-    rainfallRate: 165,
-    displacementRate: '+16.4 mm/hr',
-    vibrationHz: 5.2,
+    coords: [93.7500, 25.8000],
+    saturation: 92.4,
+    rainfallRate: 150,
+    displacementRate: '+14.8 mm/hr',
+    vibrationHz: 4.8,
     status: 'CRITICAL',
     lastPing: '2s ago'
   },
   {
-    id: 'SN-UK-502',
-    name: 'Helang NH-58 Escarpment Piezometer',
+    id: 'SN-NE-502',
+    name: 'Melthum Aizawl Escarpment Piezometer',
     type: 'Pore Pressure Piezometer',
-    coords: [79.4500, 30.4300],
-    saturation: 90.2,
-    rainfallRate: 160,
-    displacementRate: '+11.8 mm/hr',
-    vibrationHz: 4.1,
+    coords: [92.7176, 23.7271],
+    saturation: 94.6,
+    rainfallRate: 175,
+    displacementRate: '+18.2 mm/hr',
+    vibrationHz: 5.6,
     status: 'CRITICAL',
-    lastPing: '5s ago'
+    lastPing: '4s ago'
   },
   {
-    id: 'SN-UK-503',
-    name: 'Sonprayag Mandakini Radar Station',
+    id: 'SN-NE-503',
+    name: 'Tupul Ijai River Debris Radar',
     type: 'Hydro-Acoustic Debris Radar',
-    coords: [79.0500, 30.6300],
-    saturation: 84.5,
+    coords: [93.6833, 24.8167],
+    saturation: 90.1,
     rainfallRate: 185,
-    displacementRate: '+6.2 mm/hr',
-    vibrationHz: 2.8,
+    displacementRate: '+8.6 mm/hr',
+    vibrationHz: 3.4,
     status: 'MONITOR',
-    lastPing: '8s ago'
+    lastPing: '7s ago'
   },
   {
-    id: 'SN-UK-504',
-    name: 'Maldevta Song River Doppler Terminal',
+    id: 'SN-NE-504',
+    name: 'Guwahati Nilachal Doppler Terminal',
     type: 'Rain Doppler & Barometer',
-    coords: [78.0800, 30.3300],
-    saturation: 68.0,
-    rainfallRate: 130,
-    displacementRate: '+0.8 mm/hr',
-    vibrationHz: 0.6,
+    coords: [91.7362, 26.1445],
+    saturation: 76.2,
+    rainfallRate: 110,
+    displacementRate: '+1.2 mm/hr',
+    vibrationHz: 0.9,
     status: 'STABLE',
     lastPing: '1s ago'
   }

@@ -2,13 +2,16 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 
 const GpsContext = createContext();
 
-// Uttarakhand Bounding Box Constraint
-export const UTTARAKHAND_BOUNDS = {
-  north: 31.5,
-  south: 28.7,
-  east: 81.1,
-  west: 77.0
+// Northeast India (7 Sister States) Bounding Box Constraint
+export const NORTHEAST_BOUNDS = {
+  north: 29.5,
+  south: 21.5,
+  east: 97.5,
+  west: 89.6
 };
+
+// Backward compatibility alias
+export const UTTARAKHAND_BOUNDS = NORTHEAST_BOUNDS;
 
 // Haversine Distance in Kilometers
 export function calculateDistanceKm(lat1, lon1, lat2, lon2) {
@@ -32,15 +35,17 @@ export function GpsProvider({ children }) {
   const [isLiveTracking, setIsLiveTracking] = useState(false);
   const watchIdRef = useRef(null);
 
-  // Check if coordinates fall within Uttarakhand AO
-  const isInsideUttarakhand = useCallback((lat, lng) => {
+  // Check if coordinates fall within Northeast 7 Sister States AO
+  const isInsideNortheast = useCallback((lat, lng) => {
     return (
-      lat >= UTTARAKHAND_BOUNDS.south &&
-      lat <= UTTARAKHAND_BOUNDS.north &&
-      lng >= UTTARAKHAND_BOUNDS.west &&
-      lng <= UTTARAKHAND_BOUNDS.east
+      lat >= NORTHEAST_BOUNDS.south &&
+      lat <= NORTHEAST_BOUNDS.north &&
+      lng >= NORTHEAST_BOUNDS.west &&
+      lng <= NORTHEAST_BOUNDS.east
     );
   }, []);
+
+  const isInsideUttarakhand = isInsideNortheast;
 
   // One-time GPS fix acquisition
   const acquireGps = useCallback(() => {
@@ -193,6 +198,7 @@ export function GpsProvider({ children }) {
         status,
         errorMessage,
         isLiveTracking,
+        isInsideNortheast,
         isInsideUttarakhand,
         acquireGps,
         toggleLiveTracking,
