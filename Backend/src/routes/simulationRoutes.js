@@ -1,7 +1,7 @@
 import express from 'express';
 import { db } from '../config/db.js';
 import { calculateHazardTiers } from '../services/hazardZoneCalculator.js';
-import { generateOfficialGovtAlert, generateAiClimaticPrediction, crossCheckHistoricalDisaster } from '../../../AI model/agent_predictor.js';
+import { generateOfficialGovtAlert, generateAiClimaticPrediction, crossCheckHistoricalDisaster } from '../../AI model/agent_predictor.js';
 import { climaticService } from '../services/climaticService.js';
 import { aiLivePredictionService, UTTARAKHAND_WEATHER_STATIONS } from '../services/aiLivePredictionService.js';
 

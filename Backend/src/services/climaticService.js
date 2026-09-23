@@ -1,5 +1,5 @@
-import { NORTHEAST_DISTRICTS } from '../../../AI model/dataset_loader.js';
-import { generateAiClimaticPrediction, generateOfficialGovtAlert } from '../../../AI model/agent_predictor.js';
+import { NORTHEAST_DISTRICTS } from '../../AI model/dataset_loader.js';
+import { generateAiClimaticPrediction, generateOfficialGovtAlert } from '../../AI model/agent_predictor.js';
 
 /**
  * Real-Time Climatic & Weather Intelligence Engine strictly for Northeast India (7 Sister States)

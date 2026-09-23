@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.resolve(__dirname, '../Data');
+const DATA_DIR = path.resolve(__dirname, '../../Data');
 
 // Strict Northeast India Bounding Box (Encompassing all 7 Sister States)
 // Arunachal Pradesh, Assam, Manipur, Meghalaya, Mizoram, Nagaland, Tripura

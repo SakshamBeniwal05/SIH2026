@@ -1,4 +1,4 @@
-import { generateAiClimaticPrediction, crossCheckHistoricalDisaster } from '../../../AI model/agent_predictor.js';
+import { generateAiClimaticPrediction, crossCheckHistoricalDisaster } from '../../AI model/agent_predictor.js';
 import { db } from '../config/db.js';
 
 /**

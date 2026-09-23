@@ -1,6 +1,6 @@
 import { db } from '../config/db.js';
 import { calculateHazardTiers } from './hazardZoneCalculator.js';
-import { generateOfficialGovtAlert, generateAiClimaticPrediction } from '../../../AI model/agent_predictor.js';
+import { generateOfficialGovtAlert, generateAiClimaticPrediction } from '../../AI model/agent_predictor.js';
 
 /**
  * Autonomous Gemini ReAct Reasoning Loop (Demo Simulation Engine)

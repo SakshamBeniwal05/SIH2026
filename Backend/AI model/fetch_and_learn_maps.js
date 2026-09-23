@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.resolve(__dirname, '../Data');
+const DATA_DIR = path.resolve(__dirname, '../../Data');
 
 /**
  * Public Web Map & Satellite Imagery Catalog for Northeast India (7 Sister States)
